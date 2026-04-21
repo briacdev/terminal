@@ -17,12 +17,13 @@ const visibleTags = computed(() => (props.post.tags || []).slice(0, 4))
 <template>
   <article class="brutal-card group flex h-full flex-col p-3">
     <NuxtLink :to="post.path" class="mb-3 block no-underline">
-      <img
+      <NuxtImg
         :src="post.cover || '/banner-test.jpg'"
         :alt="`${post.title} banner`"
         class="h-24 w-full border border-zinc-700 object-cover"
         loading="lazy"
-      >
+        format="webp"
+      />
     </NuxtLink>
 
     <p v-if="post.date" class="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">

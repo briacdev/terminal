@@ -20,12 +20,13 @@ const { t } = useI18n()
 <template>
   <article class="brutal-card group flex h-full flex-col p-3">
     <NuxtLink :to="project.path" class="mb-3 block no-underline">
-      <img
+      <NuxtImg
         :src="project.cover || '/banner-test.jpg'"
         :alt="`${project.title} banner`"
         class="h-24 w-full border border-zinc-700 object-cover object-top"
         loading="lazy"
-      >
+        format="webp"
+      />
     </NuxtLink>
 
     <div class="mb-2 flex items-center gap-2">

@@ -13,6 +13,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-12-01',
   devtools: { enabled: true },
   modules: [
+    '@nuxt/image',
     '@nuxt/ui',
     '@nuxt/content',
     [
@@ -33,6 +34,18 @@ export default defineNuxtConfig({
     ]
   ],
   css: ['~/assets/css/main.css'],
+
+  image: {
+    quality: 80,
+    format: ['webp', 'jpg'],
+    screens: {
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280
+    }
+  },
 
   vite: {
     plugins: [tailwindcss()] as any

@@ -84,12 +84,13 @@ useSeoMeta({
           <span>←</span>
           <span>{{ t('projectsDetail.back') }}</span>
         </NuxtLink>
-        <img
+        <NuxtImg
           :src="coverUrl"
           :alt="`${project.title} cover image`"
           class="mb-4 h-[240px] w-full rounded-none border border-zinc-700 object-cover object-top sm:h-[300px] lg:h-[360px]"
           loading="lazy"
-        >
+          format="webp"
+        />
         <div class="flex items-center gap-2">
           <p class="text-xs uppercase tracking-wide text-zinc-400">{{ project.year }}</p>
           <span class="h-3.5 w-px bg-zinc-700" aria-hidden="true" />

@@ -30,12 +30,13 @@ useSeoMeta({
   <article class="blog-article-grid grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
     <div class="blog-article-main space-y-6">
       <header class="space-y-3 border-b border-zinc-800 pb-6">
-        <img
+        <NuxtImg
           :src="coverUrl"
           :alt="`${post.title} cover image`"
           class="mb-4 w-full rounded-none border border-zinc-700 object-cover aspect-[16/6]"
           loading="lazy"
-        >
+          format="webp"
+        />
         <p class="text-xs uppercase tracking-wide text-zinc-400">{{ new Date(post.date).toLocaleDateString('fr-FR') }}</p>
         <h1 class="text-3xl font-bold leading-tight sm:text-4xl">{{ post.title }}</h1>
         <p class="max-w-3xl text-zinc-300">{{ post.description }}</p>

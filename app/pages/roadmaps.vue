@@ -133,12 +133,13 @@ useSeoMeta({
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       <article v-for="item in filteredRoadmaps" :key="item.path" class="brutal-card group flex h-full flex-col p-5">
         <NuxtLink :to="localePath(item.path)" class="mb-3 block no-underline">
-          <img
+          <NuxtImg
             :src="item.cover || '/banner-test.jpg'"
             :alt="`${item.title} cover`"
             class="h-24 w-full border border-zinc-700 object-cover"
             loading="lazy"
-          >
+            format="webp"
+          />
         </NuxtLink>
         <p class="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">roadmap</p>
 
