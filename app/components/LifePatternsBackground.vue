@@ -5,7 +5,6 @@ type WorkerFrameMessage = {
 }
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
-const containerRef = ref<HTMLDivElement | null>(null)
 
 const MIN_FRAME_INTERVAL_MS = 33
 const GENERATION_INTERVAL_MS = 120
@@ -16,11 +15,10 @@ const CELL_SIZE_MOBILE = 3
 let worker: Worker | null = null
 let animationFrame: number | null = null
 let resizeTimer: number | null = null
-let resizeObserver: ResizeObserver | null = null
-let intersectionObserver: IntersectionObserver | null = null
 let motionMediaQuery: MediaQueryList | null = null
 let motionListener: ((event: MediaQueryListEvent) => void) | null = null
 let visibilityListener: (() => void) | null = null
+let windowResizeListener: (() => void) | null = null
 
 let latestCells: Int32Array<ArrayBufferLike> = new Int32Array()
 let cols = 0
@@ -30,10 +28,9 @@ let lastFrameAt = 0
 let lastGenerationRequestAt = 0
 let workerBusy = false
 let workerReady = false
-let isVisible = true
 let isReducedMotion = false
 
-const canAnimate = () => Boolean(worker && workerReady && isVisible && !isReducedMotion && !document.hidden)
+const canAnimate = () => Boolean(worker && workerReady && !isReducedMotion && !document.hidden)
 
 const fallbackPattern = [
   [1, 0], [2, 1], [0, 2], [1, 2], [2, 2],
@@ -63,9 +60,8 @@ const stopLoop = () => {
 
 const draw = () => {
   const canvas = canvasRef.value
-  const container = containerRef.value
 
-  if (!canvas || !container) {
+  if (!canvas) {
     return
   }
 
@@ -74,8 +70,8 @@ const draw = () => {
     return
   }
 
-  const width = container.clientWidth
-  const height = container.clientHeight
+  const width = window.innerWidth
+  const height = window.innerHeight
   const dpr = window.devicePixelRatio || 1
   const canvasWidth = Math.floor(width * dpr)
   const canvasHeight = Math.floor(height * dpr)
@@ -148,14 +144,8 @@ const updateActivity = () => {
 const postWorldSize = (messageType: 'init' | 'resize') => {
   const compact = window.innerWidth < 900
   cellSize = compact ? CELL_SIZE_MOBILE : CELL_SIZE_DESKTOP
-
-  const container = containerRef.value
-  if (!container) {
-    return
-  }
-
-  cols = Math.max(Math.ceil(container.clientWidth / cellSize), 1)
-  rows = Math.max(Math.ceil(container.clientHeight / cellSize), 1)
+  cols = Math.max(Math.ceil(window.innerWidth / cellSize), 1)
+  rows = Math.max(Math.ceil(window.innerHeight / cellSize), 1)
 
   if (!worker) {
     latestCells = buildFallbackCells()
@@ -202,7 +192,7 @@ const createWorker = () => {
     latestCells = event.data.cells
     workerBusy = false
 
-    if (isVisible && !document.hidden) {
+    if (!document.hidden) {
       draw()
     }
   }
@@ -232,19 +222,10 @@ onMounted(() => {
   }
   document.addEventListener('visibilitychange', visibilityListener)
 
-  if ('IntersectionObserver' in window && containerRef.value) {
-    intersectionObserver = new IntersectionObserver(([entry]) => {
-      isVisible = Boolean(entry?.isIntersecting)
-      updateActivity()
-    }, { threshold: 0.01 })
-    intersectionObserver.observe(containerRef.value)
+  windowResizeListener = () => {
+    scheduleResizeSync()
   }
-
-  resizeObserver = new ResizeObserver(scheduleResizeSync)
-
-  if (containerRef.value) {
-    resizeObserver.observe(containerRef.value)
-  }
+  window.addEventListener('resize', windowResizeListener)
 
   createWorker()
   syncCanvas('init')
@@ -257,8 +238,6 @@ onUnmounted(() => {
     window.clearTimeout(resizeTimer)
   }
 
-  resizeObserver?.disconnect()
-  intersectionObserver?.disconnect()
   worker?.terminate()
 
   if (motionMediaQuery && motionListener) {
@@ -268,18 +247,22 @@ onUnmounted(() => {
   if (visibilityListener) {
     document.removeEventListener('visibilitychange', visibilityListener)
   }
+
+  if (windowResizeListener) {
+    window.removeEventListener('resize', windowResizeListener)
+  }
 })
 </script>
 
 <template>
-  <div ref="containerRef" class="life-background" aria-hidden="true">
+  <div class="life-background" aria-hidden="true">
     <canvas ref="canvasRef" class="life-canvas" />
   </div>
 </template>
 
 <style scoped>
 .life-background {
-  position: absolute;
+  position: fixed;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
