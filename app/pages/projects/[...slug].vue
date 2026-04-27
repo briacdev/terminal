@@ -23,7 +23,7 @@ if (!project) {
   throw createError({ statusCode: 404, statusMessage: 'Project not found' })
 }
 
-const allProjects = await useProjects()
+const allProjects = await useProjects(locale.value)
 const currentPath = computed(() => defaultProject?.path || project.path)
 const currentIndex = computed(() => allProjects.findIndex((item) => item.path === currentPath.value))
 const prevProject = computed(() =>
@@ -47,6 +47,7 @@ const stackIconMap: Record<string, { icon: string, color: string, label: string 
   vue: { icon: 'i-simple-icons-vuedotjs', color: '#42B883', label: 'Vue.js' },
   springboot: { icon: 'i-simple-icons-springboot', color: '#6DB33F', label: 'Spring Boot' },
   postgresql: { icon: 'i-simple-icons-postgresql', color: '#4169E1', label: 'PostgreSQL' },
+  go: { icon: 'i-simple-icons-go', color: '#00ADD8', label: 'Go' },
   ollama: { icon: 'i-lucide-bot', color: '#FFFFFF', label: 'Ollama' },
   java: { icon: 'i-simple-icons-openjdk', color: '#EA2D2E', label: 'Java' }
 }
@@ -155,7 +156,7 @@ useSeoMeta({
       <nav class="grid gap-4 border-t border-zinc-800 pt-6 sm:grid-cols-2" :aria-label="t('projectsDetail.navigationAria')">
         <NuxtLink
           v-if="prevProject"
-          :to="prevProject.path"
+          :to="localePath(prevProject.path)"
           class="button-like border border-zinc-700 p-4 no-underline hover:bg-white hover:text-black"
         >
           <p class="text-xs uppercase text-zinc-400">{{ t('projectsDetail.previous') }}</p>
@@ -163,7 +164,7 @@ useSeoMeta({
         </NuxtLink>
         <NuxtLink
           v-if="nextProject"
-          :to="nextProject.path"
+          :to="localePath(nextProject.path)"
           class="button-like border border-zinc-700 p-4 no-underline hover:bg-white hover:text-black"
         >
           <p class="text-xs uppercase text-zinc-400">{{ t('projectsDetail.next') }}</p>

@@ -2,9 +2,9 @@
 import { useI18n, useLocalePath } from '#i18n'
 
 const posts = await usePosts()
-const projects = await useProjects()
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
+const projects = await useProjects(locale.value)
 
 const latestPosts = computed(() => posts.slice(0, 3))
 const featuredProjects = computed(() => projects.slice(0, 3))

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useI18n } from '#i18n'
 
-const projects = await useProjects()
+const { t, locale } = useI18n()
+const projects = await useProjects(locale.value)
 const search = ref('')
 const activeTag = ref<string | null>(null)
-const { t } = useI18n()
 
 const allTags = computed(() => {
   return Array.from(new Set(projects.flatMap((project) => project.tags))).sort((a, b) => a.localeCompare(b))

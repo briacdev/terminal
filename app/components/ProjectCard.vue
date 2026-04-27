@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useI18n } from '#i18n'
+import { useI18n, useLocalePath } from '#i18n'
 
 const props = defineProps<{
   project: {
@@ -15,11 +15,12 @@ const props = defineProps<{
 
 const visibleTags = computed(() => (props.project.tags || []).slice(0, 4))
 const { t } = useI18n()
+const localePath = useLocalePath()
 </script>
 
 <template>
   <article class="brutal-card group flex h-full flex-col p-3">
-    <NuxtLink :to="project.path" class="mb-3 block no-underline">
+    <NuxtLink :to="localePath(project.path)" class="mb-3 block no-underline">
       <NuxtImg
         :src="project.cover || '/banner-test.jpg'"
         :alt="`${project.title} banner`"
@@ -43,7 +44,7 @@ const { t } = useI18n()
     </div>
 
     <h3 class="mb-2 text-lg font-bold uppercase leading-tight">
-      <NuxtLink :to="project.path" class="no-underline">
+      <NuxtLink :to="localePath(project.path)" class="no-underline">
         {{ project.title }}
       </NuxtLink>
     </h3>
@@ -54,7 +55,7 @@ const { t } = useI18n()
       <div class="flex flex-wrap gap-2">
         <TagPill v-for="tag in visibleTags" :key="tag" :label="tag" />
       </div>
-      <NuxtLink :to="project.path" class="card-open-link text-xs font-bold uppercase tracking-[0.15em] text-zinc-500 no-underline transition group-hover:text-white">
+      <NuxtLink :to="localePath(project.path)" class="card-open-link text-xs font-bold uppercase tracking-[0.15em] text-zinc-500 no-underline transition group-hover:text-white">
         inspect &gt;
       </NuxtLink>
     </div>
