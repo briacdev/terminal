@@ -46,6 +46,18 @@ export default defineNuxtConfig({
       }
     ]
   ],
+  content: {
+    renderer: {
+      anchorLinks: {
+        h2: false,
+        h3: false,
+        h4: false,
+        h5: false,
+        h6: false
+      }
+    }
+  },
+
   css: ['~/assets/css/main.css'],
 
   vite: {
@@ -120,9 +132,9 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
-    content: {
-      integrityCheck: contentIntegrityCheck
-    },
+  content: {
+    integrityCheck: contentIntegrityCheck
+  },
     githubToken,
     public: {
       siteUrl,

@@ -462,7 +462,7 @@ button:hover,
 }
 
 .blog-prose {
-  max-width: 72ch;
+  max-width: none;
   font-size: 1rem;
   line-height: 1.8;
   color: #e7e7e7;
@@ -512,7 +512,7 @@ button:hover,
 
 .blog-prose p,
 .blog-prose li {
-  max-width: 72ch;
+  max-width: none;
 }
 
 .blog-prose p {

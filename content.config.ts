@@ -8,6 +8,8 @@ export default defineContentConfig({
       schema: z.object({
         title: z.string(),
         description: z.string(),
+        titleFr: z.string().optional(),
+        descriptionFr: z.string().optional(),
         date: z.union([z.string(), z.date()]).transform((value) => {
           if (typeof value === 'string') {
             return value
@@ -17,6 +19,8 @@ export default defineContentConfig({
         tags: z.array(z.string()).default([]),
         draft: z.boolean().default(false),
         cover: z.string().optional(),
+        coverAlt: z.string().optional(),
+        coverAltFr: z.string().optional(),
         readingTime: z.string().optional()
       })
     }),

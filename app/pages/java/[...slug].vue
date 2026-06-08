@@ -112,8 +112,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <article class="blog-article-grid grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
-    <div class="blog-article-main space-y-6">
+  <article class="blog-article-main space-y-6">
       <header class="space-y-3 border-b border-zinc-800 pb-6">
         <NuxtLink
           :to="localePath('/java')"
@@ -123,11 +122,21 @@ useSeoMeta({
           <span>{{ ui.back }}</span>
         </NuxtLink>
         <h1 class="text-3xl font-bold leading-tight sm:text-4xl">{{ post.title }}</h1>
-        <p class="max-w-3xl text-zinc-300">{{ post.description }}</p>
+        <p class="text-zinc-300">{{ post.description }}</p>
         <div class="flex flex-wrap gap-2">
           <TagPill v-for="tag in visibleTags" :key="tag" :label="tag" />
         </div>
       </header>
+
+      <nav class="border border-zinc-700 p-4" :aria-label="ui.toc">
+        <p class="text-xs uppercase tracking-wide text-zinc-400">{{ ui.toc }}</p>
+        <ul v-if="post.body?.toc?.links?.length" class="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
+          <li v-for="item in post.body.toc.links" :key="item.id">
+            <a :href="`#${item.id}`" class="no-underline hover:underline">{{ item.text }}</a>
+          </li>
+        </ul>
+        <p v-else class="mt-3 text-sm text-zinc-400">{{ ui.noHeadings }}</p>
+      </nav>
 
       <ContentRenderer :value="post" class="prose prose-invert blog-prose max-w-none" />
 
@@ -149,16 +158,5 @@ useSeoMeta({
           <p class="text-base font-semibold">{{ nextPost.title }}</p>
         </NuxtLink>
       </nav>
-    </div>
-
-    <aside class="space-y-3 lg:sticky lg:top-24 lg:self-start">
-      <p class="text-xs uppercase tracking-wide text-zinc-400">{{ ui.toc }}</p>
-      <ul v-if="post.body?.toc?.links?.length" class="space-y-2 border border-zinc-700 p-4 text-sm">
-        <li v-for="item in post.body.toc.links" :key="item.id">
-          <a :href="`#${item.id}`" class="no-underline hover:underline">{{ item.text }}</a>
-        </li>
-      </ul>
-      <p v-else class="border border-zinc-700 p-4 text-sm text-zinc-400">{{ ui.noHeadings }}</p>
-    </aside>
   </article>
 </template>
