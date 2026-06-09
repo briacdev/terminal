@@ -153,8 +153,9 @@ useSeoMeta({
       <nav class="border border-zinc-700 p-4" :aria-label="t('projectsDetail.toc')">
         <p class="text-xs uppercase tracking-wide text-zinc-400">{{ t('projectsDetail.toc') }}</p>
         <ul v-if="project.body?.toc?.links?.length" class="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
-          <li v-for="item in project.body.toc.links" :key="item.id">
-            <a :href="`#${item.id}`" class="no-underline hover:underline">{{ item.text }}</a>
+          <li v-for="(item, index) in project.body.toc.links" :key="item.id" class="flex items-start gap-2">
+            <span class="inline-flex h-5 min-w-5 shrink-0 items-center justify-center border border-zinc-700 px-1 font-mono text-[10px] leading-none text-zinc-400">{{ index + 1 }}</span>
+            <a :href="`#${item.id}`" class="min-w-0 no-underline hover:underline">{{ item.text }}</a>
           </li>
         </ul>
         <p v-else class="mt-3 text-sm text-zinc-400">{{ t('projectsDetail.noHeadings') }}</p>
