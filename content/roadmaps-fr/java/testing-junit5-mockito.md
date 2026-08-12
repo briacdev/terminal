@@ -1,13 +1,13 @@
 ---
 title: Tests - JUnit 5 et Mockito
-description: "Guide complet pour ecrire des tests unitaires robustes avec JUnit 5 et Mockito: Given/When/Then, when-thenReturn, given-willReturn, verify et bonnes pratiques."
+description: "Écrire des tests unitaires Java robustes avec JUnit 5 et Mockito : Arrange/Act/Assert, stubs, verify et conception de tests lisibles."
 date: 2025-01-16
 tags: [java, testing, junit5, mockito]
 draft: false
 readingTime: 20 min
 ---
 
-## Pourquoi cette etape est importante
+## Pourquoi cette étape est importante
 
 Un test utile ne sert pas seulement a "faire vert" dans la CI.
 Il sert a:

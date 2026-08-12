@@ -1,23 +1,25 @@
 ---
 title: Concurrence - Threads et synchronisation
-description: Comprendre le cycle de vie des threads Java, la synchronisation, les verrous et les race conditions avec des exemples pratiques.
+description: "Comprendre les threads Java, les race conditions, synchronized, ReentrantLock, volatile et les types Atomic pour un état partagé sûr."
 date: 2025-01-07
 tags: [java, concurrency, threads, synchronization]
 draft: false
-readingTime: 14 min
+readingTime: 16 min
 ---
 
-## Pourquoi cette etape est importante
+## Pourquoi cette étape est importante
 
-Les services backend traitent plusieurs requetes en parallele.
-Sans bases solides en concurrence, l'etat partage devient incoherent et produit des bugs non deterministes.
+Les services backend modernes traitent beaucoup de requêtes en parallèle.
+Sans bases de concurrence, l’état partagé devient incohérent et les bugs non déterministes.
 
-## Cycle de vie d'un thread
+Cette étape pose le modèle mental avant les pools et les pipelines async.
 
-Un thread passe generalement par :
+## Cycle de vie d’un thread
+
+Un thread passe typiquement par :
 
 - new
-- runnable/running
+- runnable / running
 - blocked ou waiting
 - terminated
 
@@ -26,9 +28,12 @@ Thread t = new Thread(() -> System.out.println("worker"));
 t.start();
 ```
 
+Appeler `run()` directement ne démarre pas un nouveau thread.
+En pratique, préférez les executors ; apprenez les threads bruts pour comprendre ce que les pools gèrent.
+
 ## Exemple de race condition
 
-Une race condition arrive quand plusieurs threads modifient un etat partage sans coordination.
+Une race condition apparaît quand plusieurs threads mettent à jour un état partagé sans coordination.
 
 ```java
 class Counter {
@@ -40,11 +45,12 @@ class Counter {
 }
 ```
 
-Deux threads peuvent lire la meme valeur et ecraser la mise a jour de l'autre.
+Deux threads peuvent lire la même valeur et s’écraser mutuellement.
+Les symptômes n’apparaissent souvent que sous charge.
 
 ## `synchronized`
 
-Utilise `synchronized` pour proteger les sections critiques.
+Utilisez `synchronized` pour protéger les sections critiques.
 
 ```java
 class SafeCounter {
@@ -60,11 +66,12 @@ class SafeCounter {
 }
 ```
 
-Cela garantit qu'un seul thread entre dans la methode synchronisee a la fois.
+Un seul thread entre à la fois dans la méthode synchronisée pour cette instance.
+Gardez les sections critiques petites.
 
-## Verrous (`ReentrantLock`)
+## Locks (`ReentrantLock`)
 
-Les verrous donnent plus de controle que `synchronized`.
+Les locks offrent plus de contrôle que `synchronized`.
 
 ```java
 Lock lock = new ReentrantLock();
@@ -77,28 +84,44 @@ try {
 }
 ```
 
-Utilise les locks quand tu as besoin de `tryLock()` ou d'equite de verrouillage.
+Utilisez-les pour `tryLock()`, l’interruption ou des politiques d’équité.
+Toujours déverrouiller dans un `finally`.
 
-## Visibilite et atomicite
+## Visibilité et atomicité
 
-- `volatile` : garantie de visibilite lecture/ecriture, mais pas d'atomicite complete
-- `AtomicInteger` : operations atomiques sans lock explicite pour des compteurs simples
+- `volatile` : garantie de visibilité lecture/écriture, pas d’atomicité complète des mises à jour composées
+- `AtomicInteger` : opérations atomiques sans lock explicite pour des compteurs simples
 
 ```java
 AtomicInteger counter = new AtomicInteger();
 counter.incrementAndGet();
 ```
 
-## Erreurs frequentes
+Les bugs de visibilité ressemblent souvent à un “cache périmé” entre threads.
+
+## Conseil de conception
+
+Préférez immutabilité et confinement (pas de partage) aux locks lourds.
+Moins d’état mutable partagé = concurrence plus simple.
+
+## Erreurs fréquentes
 
 - partager des objets mutables sans synchronisation
-- verrouiller trop de code (goulet de performance)
-- oublier `unlock()` avec un lock
-- penser que ces bugs seront faciles a reproduire
+- verrouiller trop de code (chute de débit)
+- oublier `unlock()`
+- croire que les bugs de concurrence seront faciles à reproduire
+- synchroniser sur des objets publics verrouillables ailleurs
 
-## A retenir
+## Checklist pratique
 
-1. Comprendre les race conditions et le risque de l'etat mutable partage
-2. Utiliser `synchronized` ou des verrous sur les sections critiques
-3. Preferer les classes atomiques pour les compteurs simples
-4. Garder un design thread-safe explicite et minimal
+- reproduire une race sur un compteur non synchronisé
+- la corriger avec `synchronized`, puis avec `AtomicInteger`
+- protéger une section critique avec `ReentrantLock` et `finally`
+- identifier un champ mutable partagé et décider confinement vs protection
+
+## À retenir
+
+1. Comprendre les race conditions et le risque d’état mutable partagé
+2. Utiliser `synchronized` ou des locks pour les sections critiques
+3. Préférer les classes atomiques pour les compteurs simples
+4. Garder le design thread-safe explicite et minimal

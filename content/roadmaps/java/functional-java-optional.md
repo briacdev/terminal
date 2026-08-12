@@ -1,15 +1,18 @@
 ---
 title: Functional Java - Optional
-description: Learn when and how to use Optional in Java for null-safe flows, map/flatMap/orElse patterns, and API boundary best practices.
+description: "Model missing values safely with Java Optional: map, flatMap, orElseGet, orElseThrow, and API-boundary best practices."
 date: 2025-01-05
 tags: [java, functional, optional, null-safety]
 draft: false
-readingTime: 12 min
+readingTime: 14 min
 ---
 
 ## Why this step matters
 
-`null` is a frequent source of production bugs. `Optional` helps model absence explicitly and avoid hidden `NullPointerException`.
+`null` is a frequent source of production bugs.
+`Optional` helps model absence explicitly and avoid hidden `NullPointerException`.
+
+Use it to make “maybe missing” part of the type system at API boundaries.
 
 ## Core idea
 
@@ -42,6 +45,7 @@ System.out.println(domain); // example.com
 - `flatMap`: chain Optional-returning calls
 - `orElse` / `orElseGet`: fallback values
 - `orElseThrow`: fail explicitly
+- `ifPresent` / `ifPresentOrElse`: side-effect style handling
 
 ## `map` vs `flatMap`
 
@@ -59,22 +63,15 @@ Optional<Optional<String>> wrong = user.map(u -> findCityByUser(u.id()));
 Optional<String> correct = user.flatMap(u -> findCityByUser(u.id()));
 ```
 
-Why:
-
-- with `map`, Java wraps mapper output again, so you get `Optional<Optional<String>>`
-- with `flatMap`, Java avoids double wrapping and returns a single `Optional<String>`
-
 Use `map` when your mapper returns a plain value:
 
 ```java
-Optional<User> user = findUser("briac");
 Optional<String> username = user.map(User::username);
 ```
 
 Use `flatMap` when your mapper returns an `Optional`:
 
 ```java
-Optional<User> user = findUser("briac");
 Optional<String> city = user.flatMap(u -> findCityByUser(u.id()));
 ```
 
@@ -87,7 +84,8 @@ Good:
 Avoid:
 
 - fields of type `Optional` in entities/DTOs
-- `Optional` as method parameter in most cases
+- `Optional` as method parameters in most cases
+- returning `null` from a method that already returns `Optional`
 
 ## `orElse` vs `orElseGet`
 
@@ -99,16 +97,25 @@ String value = optional.orElseGet(() -> expensiveFallback());
 ```
 
 Prefer `orElseGet` when fallback is costly.
+Prefer `orElseThrow` when absence is a real error.
 
 ## Common mistakes
 
 - using `Optional.get()` without checking presence
 - wrapping everything in Optional (over-design)
 - returning `null` instead of `Optional.empty()`
+- using Optional for mandatory fields just to feel “modern”
+
+## Practice checklist
+
+- replace a nullable return with `Optional`
+- chain `map` and `flatMap` for a nested lookup
+- choose between `orElse`, `orElseGet`, and `orElseThrow` intentionally
+- remove an `Optional` field from a DTO if you find one
 
 ## Takeaway
 
 1. Use Optional to model missing values explicitly
 2. Compose with `map` and `flatMap`
-3. Use `orElseGet`/`orElseThrow` intentionally
+3. Use `orElseGet` / `orElseThrow` intentionally
 4. Keep Optional at API/query boundaries, not everywhere

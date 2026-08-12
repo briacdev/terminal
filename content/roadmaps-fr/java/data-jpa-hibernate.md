@@ -1,17 +1,19 @@
 ---
-title: Data - JPA et Hibernate
-description: "Apprendre les bases JPA/Hibernate: mapping d'entites, lazy vs eager loading, piege N+1 et limites transactionnelles."
+title: Données - JPA et Hibernate
+description: "Utiliser JPA/Hibernate efficacement : mapping d’entités, lazy vs eager, prévention du N+1, transactions et projections sûres pour les API."
 date: 2025-01-13
 tags: [java, data, jpa, hibernate]
 draft: false
-readingTime: 15 min
+readingTime: 17 min
 ---
 
-## Pourquoi cette etape est importante
+## Pourquoi cette étape est importante
 
-JPA/Hibernate accelere le developpement, mais un comportement SQL implicite mal maitrise peut provoquer de gros problemes de performance.
+JPA/Hibernate accélère le développement, mais un comportement de requêtes opaque peut créer de gros problèmes de performance.
 
-## Bases du mapping d'entites
+Traitez l’ORM comme une couche de productivité au-dessus de SQL, pas comme un remplacement de la culture SQL.
+
+## Mapping d’entité de base
 
 ```java
 @Entity
@@ -21,64 +23,94 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String email;
 }
 ```
 
-Annotations centrales :
+Annotations cœur :
 
 - `@Entity`, `@Table`
 - `@Id`, `@GeneratedValue`
-- annotations de relation (`@OneToMany`, `@ManyToOne`, etc.)
+- relations (`@OneToMany`, `@ManyToOne`, `@ManyToMany`)
+- `@Column` pour contraintes et nommage
+
+Gardez les entités centrées sur la persistance.
+
+## Relations et ownership
+
+Décidez quelle côté possède la clé étrangère.
+Préférez `@ManyToOne` côté enfant pour un mapping plus simple.
+Les relations bidirectionnelles demandent de synchroniser les deux côtés.
 
 ## Lazy vs eager loading
 
-- `LAZY` : charge la relation seulement a l'acces
-- `EAGER` : charge la relation immediatement
+- `LAZY` : charge la relation seulement à l’accès
+- `EAGER` : charge immédiatement
 
-Recommendation par defaut : preferer `LAZY` et charger explicitement selon le besoin.
+Recommandation : préférez `LAZY` et fetch intentionnel selon le cas d’usage.
 
-## Probleme N+1
+Accéder à une association lazy hors contexte de persistance provoque des erreurs de lazy-loading.
 
-Le N+1 arrive quand on charge une liste d'entites puis chaque relation individuellement.
+## Problème N+1
 
-Mitigations classiques :
+Le N+1 apparaît quand vous chargez une liste d’entités, puis chaque relation une par une en lazy.
 
-- `JOIN FETCH`
+Mitigations typiques :
+
+- `JOIN FETCH` en JPQL
 - entity graphs
-- projections pour les lectures
+- requêtes de projection / DTO pour les lectures
+- batch fetching si pertinent
 
-## Limites transactionnelles
+Inspectez toujours les logs SQL en développement.
 
-Garder les transactions autour d'operations metier coherentes.
+## Frontières transactionnelles
 
-En Spring :
+Gardez les transactions autour d’opérations métier cohérentes.
 
 ```java
 @Transactional
 public void processOrder(Long orderId) {
-    // load, validate, update, persist
+    // charger, valider, mettre à jour, persister
 }
 ```
 
-Ne pas laisser une transaction ouverte plus longtemps que necessaire.
+Ne gardez pas une transaction ouverte pendant des appels HTTP distants.
+Le timing de flush/commit influence quand les contraintes sont vérifiées.
+
+## Modèle en écriture vs modèle en lecture
+
+- écriture : entités et agrégats
+- lecture : projections / DTO adaptés à l’écran ou à l’API
+
+Retourner des entités directement depuis une API publique fuit souvent des détails de persistance et déclenche des lazy loads accidentels.
 
 ## Conseils pratiques
 
-- separer modele d'ecriture (entites) et modele de lecture (DTO/projections)
-- logger le SQL en dev pour comprendre les requetes generees
-- mesurer avant d'optimiser
+- distinguer entités d’écriture et DTO/projections de lecture
+- logger le SQL en dev pour comprendre les requêtes générées
+- mesurer avant d’ajuster les stratégies de fetch
+- écrire des tests d’intégration sur les flux data critiques
 
-## Erreurs frequentes
+## Erreurs fréquentes
 
-- eager loading partout par defaut
-- exposer les entites directement dans les APIs publiques
+- eager loading partout par défaut
+- retourner des entités dans les API publiques
 - ignorer le timing flush/transaction
-- absence de tests de comportement data
+- aucune couverture de tests sur l’accès data
+- “corriger” le N+1 en ajoutant encore plus d’eager
 
-## A retenir
+## Checklist pratique
 
-1. JPA accelere, mais SQL reste indispensable
-2. Gerer la strategie de chargement de maniere intentionnelle
-3. Surveiller N+1 et corriger avec un fetch explicite
-4. Garder des transactions courtes et claires
+- mapper une entité simple avec id et email unique
+- reproduire un N+1 dans les logs, puis le corriger avec `JOIN FETCH` ou une projection
+- encapsuler une écriture multi-étapes dans `@Transactional`
+- retourner un DTO plutôt qu’une entité depuis un service
+
+## À retenir
+
+1. JPA accélère, mais la compréhension SQL reste indispensable
+2. Gérer intentionnellement la stratégie de chargement
+3. Surveiller le N+1 et le corriger avec un fetch explicite
+4. Garder le scope transactionnel clair et minimal

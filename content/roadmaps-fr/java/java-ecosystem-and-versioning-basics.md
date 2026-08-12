@@ -1,7 +1,7 @@
 ---
 title: Origines de Java, versions et bases du LTS
 description: Comprendre l'histoire de Java, le cycle des versions, la stratégie LTS, l'état actuel du langage et ses usages majeurs.
-date: 2024-12-21
+date: 2024-12-20
 tags: [java, versions, lts, ecosystem]
 draft: false
 readingTime: 7 min

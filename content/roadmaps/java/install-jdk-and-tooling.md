@@ -1,10 +1,10 @@
 ---
 title: Install JDK and Tooling
-description: Set up JDK 21+, configure JAVA_HOME/PATH, and pick a productive Java IDE.
-date: 2024-12-20
+description: "Set up a reproducible Java workstation: install JDK 21+, configure JAVA_HOME/PATH, align your IDE SDK, and validate with HelloWorld."
+date: 2024-12-21
 tags: [java, setup, jdk, tooling]
 draft: false
-readingTime: 4 min
+readingTime: 10 min
 ---
 
 ## Why this step matters
@@ -110,5 +110,26 @@ For Java projects, I recommend using **IntelliJ IDEA** over VS Code for a more c
 - `JAVA_HOME` points to your intended JDK
 - IDE project SDK uses the same JDK
 - A simple `HelloWorld` compiles and runs
+
+## Common setup mistakes
+
+- terminal uses JDK 21 while the IDE still points to an older SDK
+- `PATH` order picks a different `java` than `JAVA_HOME`
+- multiple JDKs installed with no clear default for Maven/Gradle
+- skipping verification after changing shell config
+
+## Practice checklist
+
+- install one LTS JDK 21+ distribution
+- export `JAVA_HOME` and confirm `which java` / `where java`
+- create and run a local `HelloWorld`
+- set the same JDK as the project SDK in your IDE
+
+## Takeaway
+
+1. Use one intentional JDK version across terminal and IDE
+2. Prefer an LTS distribution for learning and production alignment
+3. Verify with `java`, `javac`, and a tiny compile/run cycle
+4. Fix environment drift early; it saves hours later
 
 With this baseline, you are ready for the next Java roadmap steps.

@@ -1,24 +1,26 @@
 ---
 title: Java fonctionnel - Streams
-description: Apprendre les Streams Java avec map, filter, reduce, collectors, et des regles pratiques pour ne pas en abuser.
+description: "Traiter des collections avec les Streams Java : map, filter, reduce, collectors, règles de lisibilité et quand une boucle reste meilleure."
 date: 2025-01-04
 tags: [java, functional, streams, collections]
 draft: false
-readingTime: 14 min
+readingTime: 16 min
 ---
 
-## Pourquoi cette etape est importante
+## Pourquoi cette étape est importante
 
-Les Streams permettent d'exprimer clairement les transformations de donnees, surtout pour le filtrage, l'agregation et le reporting.
-Bien utilises, ils reduisent le boilerplate. Mal utilises, ils degradent la lisibilite.
+Les streams expriment clairement les transformations de données, surtout pour filtrage, agrégation et reporting.
+Bien utilisés, ils réduisent le boilerplate. Mal utilisés, ils nuisent à la lisibilité.
 
-## Modele mental d'un pipeline Stream
+Ils excellent pour des pipelines déclaratifs sur collections.
 
-Un pipeline Stream a trois parties :
+## Modèle mental d’un pipeline
+
+Un pipeline stream a trois parties :
 
 1. Source (`List`, `Set`, tableau, etc.)
-2. Operations intermediaires (`filter`, `map`, `sorted`)
-3. Operation terminale (`collect`, `forEach`, `count`, `reduce`)
+2. Opérations intermédiaires (`filter`, `map`, `sorted`)
+3. Opération terminale (`collect`, `forEach`, `count`, `reduce`)
 
 ```java
 List<String> names = List.of("alice", "bob", "anna");
@@ -31,11 +33,13 @@ List<String> result = names.stream()
 System.out.println(result); // [ALICE, ANNA]
 ```
 
+Les opérations intermédiaires sont lazy ; rien ne s’exécute sans opération terminale.
+
 ## `map`, `filter`, `reduce`
 
-- `filter` : garde les elements correspondants
-- `map` : transforme chaque element
-- `reduce` : combine les elements en un seul resultat
+- `filter` : garder les éléments correspondants
+- `map` : transformer chaque élément
+- `reduce` : combiner les éléments en un résultat
 
 ```java
 int total = List.of(10, 20, 30).stream()
@@ -45,9 +49,14 @@ int total = List.of(10, 20, 30).stream()
 System.out.println(total); // 50
 ```
 
+Aussi utiles :
+
+- `flatMap` pour une expansion un-vers-plusieurs
+- `distinct`, `sorted`, `limit`, `skip`
+
 ## Collectors
 
-Les collectors servent a construire le resultat final d'un pipeline.
+Les collectors façonnent le résultat final.
 
 ```java
 Map<String, Long> countByRole = List.of("admin", "user", "admin").stream()
@@ -64,30 +73,43 @@ Collectors utiles :
 - `joining(...)`
 - `counting()`, `summingInt(...)`
 
-## Eviter la sur-utilisation des Streams
+## Éviter la sur-utilisation
 
-Les Streams ne sont pas toujours le meilleur choix.
-Prefere des boucles quand :
+Les streams ne sont pas toujours le meilleur choix.
+Préférez les boucles quand :
 
-- la logique est tres stateful
-- plusieurs effets de bord sont necessaires
-- debugger une longue chaine est plus difficile qu'une boucle claire
+- la logique est très stateful
+- plusieurs effets de bord sont nécessaires
+- debugger une longue chaîne est plus dur qu’une boucle simple
 
-## Erreurs frequentes
+## Attention aux parallel streams
 
-- effets de bord dans `map`/`filter`
-- chaines trop longues avec intention peu claire
-- streams dans des boucles chaudes sans mesure de performance
-- croire que le parallel stream est toujours plus rapide
+`parallelStream()` peut aider sur du bulk CPU-bound, mais peut aussi dégrader la latence et compliquer ordre/debug.
+Mesurez avant d’activer le parallélisme.
 
-## Regle pratique
+## Erreurs fréquentes
 
-Utilise les Streams pour des transformations declaratives.
-Utilise des boucles pour un controle de flux complexe et mutable.
+- effets de bord dans `map` / `filter`
+- chaînes trop longues à l’intention floue
+- streams dans des hot loops sans mesure
+- croire que parallel améliore toujours
+- muter des collections partagées depuis un stream
 
-## A retenir
+## Règle pratique
 
-1. Penser en pipeline : source -> transformation -> terminal
-2. Maitriser `map`, `filter`, `reduce`, `collect`
+Streams pour transformations déclaratives.
+Boucles pour contrôle de flux complexe et workflows mutables.
+
+## Checklist pratique
+
+- filtrer et mapper une liste vers une nouvelle liste immuable
+- grouper avec `Collectors.groupingBy`
+- réécrire un stream en boucle et comparer la lisibilité
+- retirer un effet de bord d’un `map`
+
+## À retenir
+
+1. Penser en étapes : source → transform → terminal
+2. Maîtriser `map`, `filter`, `reduce`, `collect`
 3. Garder le code stream court et lisible
-4. Ne pas forcer les Streams quand une boucle est plus claire
+4. Ne pas forcer un stream quand une boucle est plus claire
