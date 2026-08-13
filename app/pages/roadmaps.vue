@@ -34,7 +34,7 @@ const roadmaps: RoadmapItem[] = [
   {
     path: '/vue-js',
     title: 'Vue.js Roadmap',
-    description: 'A practical path from Vue fundamentals to modern, production-ready frontend architecture.',
+    description: 'An 18-step Vue 3 path from Composition API fundamentals to a production SPA, with a separate Nuxt track for SSR.',
     tags: ['roadmap', 'vue', 'frontend'],
     cover: '/banner-test.jpg'
   },
