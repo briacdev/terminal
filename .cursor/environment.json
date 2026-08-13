@@ -1,0 +1,17 @@
+{
+  "name": "terminal-blog",
+  "user": "ubuntu",
+  "install": "npm ci && npx nuxt prepare",
+  "terminals": [
+    {
+      "name": "dev",
+      "command": "npm run dev"
+    }
+  ],
+  "ports": [
+    {
+      "name": "Nuxt dev server",
+      "port": 3000
+    }
+  ]
+}
