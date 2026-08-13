@@ -1,25 +1,29 @@
 ---
-title: Data - JDBC
-description: "Apprendre les fondamentaux JDBC pour le backend Java: connexions, prepared statements, transactions et mapping des resultats."
+title: Données - JDBC
+description: "Maîtriser JDBC pour le backend Java : DataSource, PreparedStatement, transactions, mapping ResultSet et fermeture sûre des ressources."
 date: 2025-01-12
 tags: [java, data, jdbc, sql]
 draft: false
-readingTime: 13 min
+readingTime: 16 min
 ---
 
-## Pourquoi cette etape est importante
+## Pourquoi cette étape est importante
 
-JDBC est la base bas niveau de nombreuses bibliotheques data plus haut niveau.
-Le comprendre aide a debugger les problemes de connexion, de SQL et de transactions.
+JDBC est la fondation bas niveau derrière beaucoup de bibliothèques data.
+La comprendre aide à diagnostiquer connexions, SQL et frontières transactionnelles.
 
-## Composants principaux
+Même avec JPA au quotidien, JDBC clarifie les incidents production.
 
-- `DataSource` : point d'entree pour obtenir des connexions
-- `Connection` : session BD
-- `PreparedStatement` : SQL parametre
-- `ResultSet` : lignes de resultat
+## Composants cœur
 
-## Exemple de requete
+- `DataSource` : fabrique / entrée du pool de connexions
+- `Connection` : session base de données
+- `PreparedStatement` : SQL paramétré
+- `ResultSet` : lignes de résultat
+
+Préférez un `DataSource` poolé en application réelle.
+
+## Exemple de requête
 
 ```java
 String sql = "SELECT id, email FROM users WHERE id = ?";
@@ -39,14 +43,21 @@ try (Connection con = dataSource.getConnection();
 }
 ```
 
-## Pourquoi les prepared statements sont essentiels
+Le try-with-resources ferme `Connection`, `PreparedStatement` et `ResultSet` de façon fiable.
 
-Ils :
+## Pourquoi les prepared statements comptent
 
-- evitent l'injection SQL en separant requete et valeurs
-- ameliorent la reutilisation des plans d'execution
+Les prepared statements :
 
-Ne jamais construire une requete avec concat de string issue de l'utilisateur.
+- empêchent l’injection SQL en séparant requête et valeurs
+- améliorent la réutilisation des plans d’exécution
+
+Ne construisez jamais du SQL avec des valeurs utilisateur par concaténation.
+
+```java
+// Dangereux - à ne pas faire
+String bad = "SELECT * FROM users WHERE email = '" + email + "'";
+```
 
 ## Transactions JDBC
 
@@ -54,7 +65,7 @@ Ne jamais construire une requete avec concat de string issue de l'utilisateur.
 try (Connection con = dataSource.getConnection()) {
     con.setAutoCommit(false);
     try {
-        // plusieurs requetes
+        // plusieurs statements
         con.commit();
     } catch (Exception e) {
         con.rollback();
@@ -63,25 +74,56 @@ try (Connection con = dataSource.getConnection()) {
 }
 ```
 
-## Mapping des resultats
+Gardez les transactions courtes.
+Ne retenez pas une connexion ouverte pendant un appel HTTP distant.
 
-Mappe chaque ligne vers un objet metier ou un DTO.
-Garde ce code explicite et testable.
+## Mapping des résultats
+
+Mappez chaque ligne vers un objet métier ou un DTO.
+Gardez le mapping explicite et testable.
 
 ```java
 record UserRow(long id, String email) {}
+
+UserRow map(ResultSet rs) throws SQLException {
+    return new UserRow(rs.getLong("id"), rs.getString("email"));
+}
 ```
 
-## Erreurs frequentes
+## Updates et clés générées
 
-- ne pas fermer `Connection`, `Statement`, `ResultSet`
-- SQL dynamique via concat non sure
-- gestion transactionnelle fragile sans rollback
-- ignorer silencieusement les exceptions SQL
+```java
+String insert = "INSERT INTO users(email) VALUES (?)";
+try (Connection con = dataSource.getConnection();
+     PreparedStatement ps = con.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS)) {
+    ps.setString(1, "dev@briacd.com");
+    ps.executeUpdate();
+    try (ResultSet keys = ps.getGeneratedKeys()) {
+        if (keys.next()) {
+            long id = keys.getLong(1);
+        }
+    }
+}
+```
 
-## A retenir
+## Erreurs fréquentes
 
-1. JDBC donne du controle precis et facilite le debug
-2. Utiliser `PreparedStatement` par defaut
-3. Gerer proprement transactions et fermeture des ressources
-4. Garder un mapping explicite et maintenable
+- ne pas fermer `Connection` / `Statement` / `ResultSet`
+- concaténer du SQL dynamique non sûr
+- transactions faibles ou rollback oublié
+- avaler silencieusement `SQLException`
+- fuite de connexions en cas d’exception
+
+## Checklist pratique
+
+- exécuter un select paramétré avec `PreparedStatement`
+- encapsuler deux écritures dans commit/rollback
+- mapper un `ResultSet` vers un record
+- vérifier le retour des connexions au pool après erreur
+
+## À retenir
+
+1. JDBC donne un contrôle précis et une clarté de debug
+2. Utiliser `PreparedStatement` par défaut
+3. Gérer soigneusement transactions et fermeture des ressources
+4. Garder le mapping de résultats explicite et maintenable

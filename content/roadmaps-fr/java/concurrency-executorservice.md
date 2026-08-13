@@ -1,83 +1,105 @@
 ---
 title: Concurrence - ExecutorService
-description: Apprendre les pools de threads avec ExecutorService, Callable/Future et les patterns de graceful shutdown pour les services backend.
+description: "Maîtriser ExecutorService en Java : pools de threads, Callable/Future, soumission de tâches et arrêt propre (graceful shutdown)."
 date: 2025-01-08
 tags: [java, concurrency, executor, futures]
 draft: false
-readingTime: 13 min
+readingTime: 15 min
 ---
 
-## Pourquoi cette etape est importante
+## Pourquoi cette étape est importante
 
-Creer des threads manuellement pour chaque tache ne passe pas a l'echelle.
-`ExecutorService` apporte une concurrence controlee via des pools de threads.
+Créer un thread brut pour chaque tâche ne scale pas.
+`ExecutorService` offre une concurrence contrôlée via des pools réutilisables.
+
+Dans un backend, les pools protègent CPU, mémoire et latence sous charge.
 
 ## Pools de threads
 
-Utilise un pool pour reutiliser les threads et limiter la consommation de ressources.
+Utilisez un pool pour réutiliser les threads et limiter le travail concurrent.
 
 ```java
 ExecutorService pool = Executors.newFixedThreadPool(4);
+
+Future<Integer> future = pool.submit(() -> computeScore(userId));
+Integer score = future.get();
+
+pool.shutdown();
 ```
 
-Choix typiques :
+Factories courantes :
 
-- pool fixe pour charge stable
-- pool cache pour pics de petites taches
-- pool planifie pour jobs periodiques
+- `newFixedThreadPool(n)` : concurrence bornée
+- `newCachedThreadPool()` : croît selon le besoin (risqué sous pics)
+- `newSingleThreadExecutor()` : travail séquentiel ordonné
+- `newScheduledThreadPool(n)` : tâches différées / périodiques
 
-## Runnable vs Callable
+En production, préférez un `ThreadPoolExecutor` explicite avec file et politique de rejet claires.
 
-- `Runnable` : pas de resultat
-- `Callable<T>` : retourne un resultat et peut lever des exceptions verifiees
+## Callable vs Runnable
+
+- `Runnable` : pas de valeur de retour
+- `Callable<T>` : retourne une valeur et peut lever des exceptions checked
 
 ```java
-Callable<Integer> task = () -> 21 * 2;
-Future<Integer> future = pool.submit(task);
-Integer value = future.get();
+Callable<String> task = () -> loadReport(42);
+Future<String> future = pool.submit(task);
 ```
 
-## Bases de `Future`
+## Travailler avec Future
 
-`Future` permet de :
+`Future` représente un résultat qui arrivera plus tard.
 
-- attendre la fin (`get()`)
-- verifier l'etat (`isDone()`)
-- annuler (`cancel(true)`)
+Méthodes utiles :
 
-Evite de bloquer partout avec `get()` ; utilise des timeouts.
+- `get()` : bloquer jusqu’à la fin
+- `get(timeout, unit)` : échouer vite si trop lent
+- `isDone()` : statut non bloquant
+- `cancel(true)` : tenter une interruption
 
-```java
-Integer value = future.get(1, TimeUnit.SECONDS);
-```
+Préférez toujours un timeout sur les chemins de requête.
 
-## Graceful shutdown
-
-Toujours fermer les executors proprement.
+## Arrêt propre
 
 ```java
 pool.shutdown();
-if (!pool.awaitTermination(5, TimeUnit.SECONDS)) {
+if (!pool.awaitTermination(30, TimeUnit.SECONDS)) {
     pool.shutdownNow();
 }
 ```
 
-Cela evite les fuites de ressources et les arrets JVM bloques.
+- `shutdown()` : refuse les nouvelles tâches, termine la file
+- `shutdownNow()` : interrompt le travail en cours et abandonne la file
 
-## Erreurs frequentes
+Branchez l’arrêt sur le cycle de vie de l’application pour éviter les fuites de threads.
 
-- ne jamais fermer le pool
-- utiliser des pools non bornes en production
-- bloquer longtemps dans des taches sans strategie de dimensionnement
-- ignorer les exceptions des futures
+## Dimensionner un pool
 
-## Regle pratique
+Il n’y a pas de formule universelle, partez du type de charge :
 
-Utilise `ExecutorService` comme outil de concurrence bas niveau par defaut quand tu as besoin d'un controle explicite du pool.
+- CPU-bound : proche du nombre de cœurs
+- I/O-bound : plus de concurrence, mesurée avec soin
+- mixte : séparer les pools par type de travail
 
-## A retenir
+Réglez avec des métriques (profondeur de file, latence, rejets), pas au feeling.
 
-1. Preferer les pools aux threads ad-hoc
-2. Utiliser `Callable/Future` pour les taches avec resultat
-3. Mettre des timeouts sur les attentes bloquantes
-4. Toujours implementer un graceful shutdown
+## Erreurs fréquentes
+
+- pools cached non bornés sous pic de trafic
+- oubli du shutdown dans les apps longues
+- `get()` sans timeout
+- soumettre du travail bloquant dans un petit pool critique
+
+## Checklist pratique
+
+- soumettre un `Callable` et lire le `Future` avec timeout
+- arrêter un pool avec `awaitTermination`
+- comparer fixed vs single-thread executor
+- observer taille de file / threads actifs sous charge
+
+## À retenir
+
+1. Préférer les pools à la création manuelle de threads
+2. Utiliser `Callable` / `Future` quand un résultat est nécessaire
+3. Arrêter proprement les executors
+4. Dimensionner et isoler les pools selon la charge mesurée

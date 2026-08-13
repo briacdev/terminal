@@ -1,20 +1,20 @@
 ---
-title: Production - Observabilite et performance
-description: "Apprendre les essentiels production pour services Java: logs structures, metriques, tracing, profiling et methode de tuning performance."
-date: 2025-01-19
+title: Production - Observabilité et performance
+description: "Opérer des services Java en production : logs structurés, métriques, tracing distribué, profiling et tuning de performance fondé sur la mesure."
+date: 2025-01-18
 tags: [java, production, observability, performance]
 draft: false
 readingTime: 20 min
 ---
 
-## Pourquoi cette etape est importante
+## Pourquoi cette étape est importante
 
-Si tu ne peux pas observer ton systeme, tu ne peux pas l'exploiter de facon fiable.
-En production, la vitesse de diagnostic compte autant que la vitesse d'execution.
+Si tu ne peux pas observer ton système, tu ne peux pas l'exploiter de façon fiable.
+En production, la vitesse de diagnostic compte autant que la vitesse d'exécution.
 
-## Logs structures
+## Logs structurés
 
-Prefere des logs structures au texte libre.
+Préfère des logs structurés au texte libre.
 Inclure des champs stables comme :
 
 - timestamp

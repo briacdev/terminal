@@ -1,10 +1,10 @@
 ---
 title: Installer le JDK et l'IDE
-description: Installer un JDK 21+, configurer JAVA_HOME/PATH et choisir un IDE Java efficace.
-date: 2024-12-20
+description: "Mettre en place un poste Java reproductible : installer JDK 21+, configurer JAVA_HOME/PATH, aligner le SDK de l’IDE et valider avec HelloWorld."
+date: 2024-12-21
 tags: [java, setup, jdk, tooling]
 draft: false
-readingTime: 4 min
+readingTime: 10 min
 ---
 
 ## Pourquoi cette étape est importante
@@ -110,5 +110,26 @@ Pour les projets Java, je recommande **IntelliJ IDEA** plutôt que VS Code pour 
 - `JAVA_HOME` pointe vers le bon JDK
 - Le SDK du projet dans l'IDE est le même JDK
 - Un `HelloWorld` compile et s'exécute
+
+## Erreurs de setup fréquentes
+
+- le terminal utilise JDK 21 alors que l’IDE pointe encore vers un SDK plus ancien
+- l’ordre du `PATH` choisit un autre `java` que `JAVA_HOME`
+- plusieurs JDK installés sans défaut clair pour Maven/Gradle
+- pas de vérification après modification de la config shell
+
+## Checklist pratique
+
+- installer une distribution LTS JDK 21+
+- exporter `JAVA_HOME` et confirmer `which java` / `where java`
+- créer et exécuter un `HelloWorld` local
+- définir le même JDK comme SDK projet dans l’IDE
+
+## À retenir
+
+1. Utiliser une seule version JDK intentionnelle entre terminal et IDE
+2. Préférer une distribution LTS pour l’apprentissage et l’alignement production
+3. Vérifier avec `java`, `javac` et un petit cycle compile/run
+4. Corriger tôt la dérive d’environnement ; cela évite des heures perdues
 
 Avec cette base, tu peux enchaîner sur les prochaines étapes de la roadmap Java.

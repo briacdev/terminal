@@ -1,16 +1,18 @@
 ---
 title: Delivery - Docker and CI/CD
-description: Learn how to containerize Java apps and build practical CI/CD pipelines with safe deployment strategies.
-date: 2025-01-18
+description: "Ship Java apps reliably with Docker images, CI quality gates, CD rollout strategies (rolling, blue/green, canary), and secret-safe config."
+date: 2025-01-17
 tags: [java, delivery, docker, cicd]
 draft: false
-readingTime: 14 min
+readingTime: 16 min
 ---
 
 ## Why this step matters
 
 Shipping software reliably is as important as writing code.
 Docker and CI/CD make builds reproducible and deployments safer.
+
+A good delivery loop turns “it works on my machine” into “it works in production”.
 
 ## Containerize the app
 
@@ -24,18 +26,22 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 ```
 
 Use lightweight runtime images and keep image size controlled.
+Prefer multi-stage builds when you compile inside Docker.
+
+Tag images with immutable versions (commit SHA or release version), not only `latest`.
 
 ## CI pipeline essentials
 
 A baseline pipeline should run:
 
-1. lint/format checks
+1. lint / format checks
 2. unit tests
 3. build package
 4. optional integration tests
 5. image build and publish
 
 Fail fast on quality gates.
+Build once and promote the same artifact through environments.
 
 ## CD and deployment strategy
 
@@ -89,7 +95,7 @@ Strengths:
 
 Limitation:
 
-- requires strong observability (logs, metrics, alerts) and fine-grained traffic routing
+- requires strong observability and fine-grained traffic routing
 
 Start simple and add progressive rollout when needed.
 
@@ -97,6 +103,12 @@ Start simple and add progressive rollout when needed.
 
 Keep secrets and env config outside images.
 Use platform secret stores or CI secret management.
+Never bake production credentials into Docker layers.
+
+## Health checks and rollback
+
+Expose health endpoints and wire them into the orchestrator.
+Define a rollback trigger: rising error rate, failed health checks, or broken SLOs.
 
 ## Common mistakes
 
@@ -104,10 +116,18 @@ Use platform secret stores or CI secret management.
 - skipping test gates before deployment
 - mutable image tags without traceability
 - no rollback strategy
+- storing secrets in the image or in plain CI logs
+
+## Practice checklist
+
+- write a minimal Dockerfile for a packaged JAR
+- add unit tests + package as required CI stages
+- choose one rollout strategy and document its rollback
+- move one secret out of source control into a secret store
 
 ## Takeaway
 
 1. Build once, deploy consistently
 2. Automate tests and packaging in CI
-3. Use safe rollout strategy in CD
+3. Use a safe rollout strategy in CD
 4. Keep deployment observable and reversible

@@ -1,32 +1,35 @@
 ---
 title: Java fonctionnel - Optional
-description: Apprendre quand et comment utiliser Optional en Java pour gerer le null-safe flow, map/flatMap/orElse et les bonnes pratiques aux frontieres d'API.
+description: "Modéliser l’absence de valeur avec Optional en Java : map, flatMap, orElseGet, orElseThrow et bonnes pratiques aux frontières d’API."
 date: 2025-01-05
 tags: [java, functional, optional, null-safety]
 draft: false
-readingTime: 12 min
+readingTime: 14 min
 ---
 
-## Pourquoi cette etape est importante
+## Pourquoi cette étape est importante
 
-`null` est une source frequente de bugs en production. `Optional` permet de modeliser explicitement l'absence d'une valeur et d'eviter des `NullPointerException` cachees.
+`null` est une source fréquente de bugs en production.
+`Optional` aide à modéliser l’absence explicitement et à éviter des `NullPointerException` cachées.
 
-## Idee centrale
+Utilisez-le pour rendre le “peut être manquant” visible dans le système de types aux frontières d’API.
 
-`Optional<T>` signifie : la valeur peut etre presente ou absente.
+## Idée centrale
+
+`Optional<T>` signifie : la valeur peut être présente ou absente.
 
 ```java
 Optional<String> token = Optional.of("abc");
 Optional<String> missing = Optional.empty();
 ```
 
-Utilisation :
+Utilisez :
 
-- `of(...)` si la valeur est garantie non nulle
-- `ofNullable(...)` si la valeur peut etre nulle
-- `empty()` pour l'absence de valeur
+- `of(...)` quand la valeur est garantie non nulle
+- `ofNullable(...)` quand elle peut être nulle
+- `empty()` pour l’absence
 
-## Operations courantes
+## Opérations courantes
 
 ```java
 Optional<String> email = Optional.ofNullable("briac@example.com");
@@ -38,19 +41,20 @@ String domain = email
 System.out.println(domain); // example.com
 ```
 
-- `map` : transforme si present
-- `flatMap` : chaine des appels qui renvoient deja un Optional
-- `orElse` / `orElseGet` : valeur de secours
-- `orElseThrow` : echec explicite
+- `map` : transformer si présent
+- `flatMap` : enchaîner des appels qui retournent Optional
+- `orElse` / `orElseGet` : valeurs de repli
+- `orElseThrow` : échouer explicitement
+- `ifPresent` / `ifPresentOrElse` : style effet de bord
 
 ## `map` vs `flatMap`
 
-La difference cle est la forme du type de retour.
+La différence clé est la forme de retour.
 
-- `map` applique une fonction `T -> R` et retourne `Optional<R>`
-- `flatMap` applique une fonction `T -> Optional<R>` et retourne `Optional<R>` (aplati)
+- `map` applique `T -> R` et retourne `Optional<R>`
+- `flatMap` applique `T -> Optional<R>` et retourne `Optional<R>` (aplati)
 
-Si le mapper renvoie deja un `Optional`, `map` cree un niveau imbrique.
+Si votre mapper retourne déjà un `Optional`, `map` crée un imbriquement.
 
 ```java
 Optional<User> user = findUser("briac");
@@ -59,56 +63,59 @@ Optional<Optional<String>> wrong = user.map(u -> findCityByUser(u.id()));
 Optional<String> correct = user.flatMap(u -> findCityByUser(u.id()));
 ```
 
-Pourquoi :
-
-- avec `map`, Java enveloppe encore le resultat, donc `Optional<Optional<String>>`
-- avec `flatMap`, Java evite ce double enveloppement et renvoie un seul `Optional<String>`
-
-Utilise `map` quand le mapper renvoie une valeur simple :
+Utilisez `map` quand le mapper retourne une valeur simple :
 
 ```java
-Optional<User> user = findUser("briac");
 Optional<String> username = user.map(User::username);
 ```
 
-Utilise `flatMap` quand le mapper renvoie deja un `Optional` :
+Utilisez `flatMap` quand le mapper retourne un `Optional` :
 
 ```java
-Optional<User> user = findUser("briac");
 Optional<String> city = user.flatMap(u -> findCityByUser(u.id()));
 ```
 
-## Bonnes pratiques aux frontieres d'API
+## Bonnes pratiques aux frontières d’API
 
-Bien :
+Bon :
 
-- retourner `Optional<T>` pour les methodes de recherche (`findById`)
+- retourner `Optional<T>` depuis des méthodes de type query (`findById`)
 
-A eviter :
+À éviter :
 
-- des champs `Optional` dans les entites/DTO
-- `Optional` en parametre de methode dans la plupart des cas
+- champs `Optional` dans entités/DTO
+- `Optional` en paramètre de méthode dans la plupart des cas
+- retourner `null` depuis une méthode qui retourne déjà `Optional`
 
 ## `orElse` vs `orElseGet`
 
-`orElse` evalue toujours son argument.
-`orElseGet` evalue la valeur de secours seulement si necessaire.
+`orElse` évalue toujours son argument.
+`orElseGet` calcule le fallback de façon lazy.
 
 ```java
 String value = optional.orElseGet(() -> expensiveFallback());
 ```
 
-Prefere `orElseGet` si le fallback est couteux.
+Préférez `orElseGet` si le fallback est coûteux.
+Préférez `orElseThrow` si l’absence est une vraie erreur.
 
-## Erreurs frequentes
+## Erreurs fréquentes
 
-- utiliser `Optional.get()` sans verifier la presence
-- envelopper tout dans Optional (sur-conception)
+- appeler `Optional.get()` sans vérifier la présence
+- tout envelopper dans Optional (sur-conception)
 - retourner `null` au lieu de `Optional.empty()`
+- mettre Optional sur des champs obligatoires juste pour “faire moderne”
 
-## A retenir
+## Checklist pratique
 
-1. Utiliser Optional pour modeliser explicitement l'absence
+- remplacer un retour nullable par `Optional`
+- enchaîner `map` et `flatMap` pour une recherche imbriquée
+- choisir intentionnellement `orElse`, `orElseGet` ou `orElseThrow`
+- retirer un champ `Optional` d’un DTO si vous en trouvez un
+
+## À retenir
+
+1. Utiliser Optional pour modéliser l’absence explicitement
 2. Composer avec `map` et `flatMap`
-3. Utiliser `orElseGet`/`orElseThrow` de maniere intentionnelle
-4. Garder Optional aux frontieres d'API/recherche, pas partout
+3. Utiliser `orElseGet` / `orElseThrow` intentionnellement
+4. Garder Optional aux frontières API/query, pas partout

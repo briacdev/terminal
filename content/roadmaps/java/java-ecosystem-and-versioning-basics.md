@@ -1,7 +1,7 @@
 ---
 title: Java Origins, Versions and LTS Basics
 description: Understand Java history, release cadence, LTS strategy, current language state, and major usage domains.
-date: 2024-12-21
+date: 2024-12-20
 tags: [java, versions, lts, ecosystem]
 draft: false
 readingTime: 7 min

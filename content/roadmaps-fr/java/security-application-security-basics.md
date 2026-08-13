@@ -1,75 +1,102 @@
 ---
-title: Securite - Bases de la securite applicative
-description: "Apprendre les fondamentaux de securite API independants du framework: authentification, autorisation, strategies token/session et durcissement des endpoints."
+title: Sécurité - Bases de la sécurité applicative
+description: "Sécuriser des API Java : AuthN/AuthZ, stratégies token vs session, durcissement des endpoints, secrets et réponses d’erreur sûres."
 date: 2025-01-15
 tags: [java, security, api, auth]
 draft: false
-readingTime: 14 min
+readingTime: 16 min
 ---
 
-## Pourquoi cette etape est importante
+## Pourquoi cette étape est importante
 
-La securite est un sujet d'architecture, pas un patch de fin de projet.
-Des frontieres de securite faibles creent des incidents couteux en production.
+La sécurité est une question d’architecture, pas un patch de dernière minute.
+Des frontières faibles créent des incidents production coûteux.
+
+Chaque endpoint backend est une surface d’attaque jusqu’à preuve du contraire.
 
 ## AuthN vs AuthZ
 
-- Authentification (AuthN): qui appelle?
-- Autorisation (AuthZ): que peut faire cet appelant?
+- Authentification (AuthN) : qui appelle ?
+- Autorisation (AuthZ) : que peut faire cet appelant ?
 
-Les deux sont indispensables pour securiser une API.
+Les deux sont nécessaires.
+Ne traitez jamais “connecté” comme “autorisé à tout”.
 
 ## Approche token vs session
 
-Base session:
+Session :
 
-- etat conserve cote serveur
-- simple pour applications web
-- necessite un stockage session scalable
+- état côté serveur
+- simple pour les apps web classiques
+- nécessite un stockage de session scalable et une protection CSRF pour les cookies
 
-Base token:
+Token :
 
-- requetes stateless avec token signe
-- frequent pour APIs et services distribues
-- demande une validation stricte et gestion d'expiration
+- requêtes sans état avec jeton signé
+- courant pour APIs et services distribués
+- exige validation stricte, expiration et stratégie de révocation
 
-## Checklist de durcissement endpoint
+Choisissez selon les contraintes d’architecture, pas selon la mode.
 
-- politique deny-by-default
-- routes publiques explicites seulement
-- validation des entrees et limites de payload
-- rate limiting sur endpoints sensibles
-- politique CORS stricte quand necessaire
+## Checklist de durcissement des endpoints
 
-## Gestion des mots de passe et secrets
+- politique d’accès deny-by-default
+- routes publiques explicites uniquement
+- validation d’entrée et limites de taille de payload
+- rate limiting sur les endpoints sensibles
+- politique CORS stricte si pertinent
+- HTTPS partout en production
+
+## Mots de passe et secrets
 
 - ne jamais stocker des credentials en clair
-- utiliser un hash fort a sens unique pour les mots de passe
+- hasher fortement les mots de passe (bcrypt/argon2 via une lib éprouvée)
 - externaliser et faire tourner les secrets
-- ne pas logger les champs sensibles
+- ne pas logger tokens, mots de passe ou données sensibles
+- préférer des access tokens courts avec contrôle de refresh
 
-## Strategie de reponse d'erreur
+## Stratégie de réponse d’erreur
 
-Renvoyer des erreurs d'auth generiques pour ne pas exposer d'informations internes.
-Exemple: contrat clair `401/403` sans details sensibles.
+Retournez des erreurs d’auth génériques pour éviter de fuiter des détails internes.
+Exemple : un contrat clair `401` / `403` sans exposer si un email existe, sauf exigence produit contraire.
 
-## Modele d'acces pratique
+## Modèle d’accès pratique
 
-Placer les verifications role/permission au plus proche des operations metier:
+Placez les contrôles rôle/permission près des opérations métier :
 
-- role pour acces grossier (admin, member)
-- permission pour actions fines (read:invoice, write:invoice)
+- rôle pour un accès grossier (`admin`, `member`)
+- permission pour des actions fines (`read:invoice`, `write:invoice`)
 
-## Erreurs frequentes
+Centralisez les décisions d’autorisation pour les rendre testables et auditables.
 
-- melanger partout auth et logique metier
-- endpoints laisses publics par erreur
-- pas de politique d'expiration token/session
-- pas de piste d'audit pour actions sensibles
+## Menaces API de base
 
-## A retenir
+Surveillez :
 
-1. Separer clairement identite (AuthN) et permissions (AuthZ)
-2. Choisir token ou session selon les contraintes d'architecture
-3. Durcir les endpoints avec une logique deny-by-default
-4. Traiter secrets, credentials et logs d'auth comme des actifs critiques
+- injections (SQL, commande, template)
+- contrôles d’accès cassés (IDOR)
+- mass assignment / over-posting
+- désérialisation non sûre
+- exposition excessive de données dans les réponses
+
+## Erreurs fréquentes
+
+- mélanger auth et logique métier partout
+- endpoints publics par accident
+- pas de politique d’expiration token/session
+- pas de piste d’audit sur actions sensibles
+- faire confiance aux claims de rôle côté client sans validation serveur
+
+## Checklist pratique
+
+- classer les routes d’une API : public / authentifié / autorisé
+- concevoir un contrôle de permission pour une écriture sensible
+- sortir les secrets des fichiers de config vers des variables d’environnement
+- vérifier que les erreurs ne fuient ni stack traces ni énumération d’utilisateurs
+
+## À retenir
+
+1. Séparer clairement identité (AuthN) et permissions (AuthZ)
+2. Choisir token ou session selon l’architecture
+3. Durcir les endpoints avec un mindset deny-by-default
+4. Traiter secrets, credentials et logs d’auth comme des assets critiques

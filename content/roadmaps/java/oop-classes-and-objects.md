@@ -223,9 +223,13 @@ class Task {
 
 This class demonstrates constructor validation, private fields, and behavior-driven updates.
 
-## Coming soon in the OOP track
+## What to practice next
 
-- Inheritance and polymorphism in depth
-- Interfaces and abstract classes
-- Composition over inheritance with concrete design examples
+Before moving on, make sure you can:
+
+- create a class with private fields and a validating constructor
+- distinguish instance members from `static` members
+- expose behavior through methods instead of public fields
+
+Next in this roadmap: inheritance and polymorphism, then interfaces and abstract classes.
 

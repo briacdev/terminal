@@ -1,83 +1,105 @@
 ---
 title: Concurrency - ExecutorService
-description: Learn thread pools with ExecutorService, Callable and Future, and graceful shutdown patterns for backend services.
+description: "Control Java concurrency with ExecutorService: thread pools, Callable/Future, task submission, and graceful shutdown patterns."
 date: 2025-01-08
 tags: [java, concurrency, executor, futures]
 draft: false
-readingTime: 13 min
+readingTime: 15 min
 ---
 
 ## Why this step matters
 
-Creating threads manually for every task does not scale.
-`ExecutorService` gives controlled concurrency through thread pools.
+Creating a raw thread for every task does not scale.
+`ExecutorService` gives controlled concurrency through reusable thread pools.
+
+In backend services, pools protect CPU, memory, and latency under load.
 
 ## Thread pools
 
-Use a pool to reuse threads and limit resource usage.
+Use a pool to reuse threads and limit concurrent work.
 
 ```java
 ExecutorService pool = Executors.newFixedThreadPool(4);
+
+Future<Integer> future = pool.submit(() -> computeScore(userId));
+Integer score = future.get();
+
+pool.shutdown();
 ```
 
-Typical choices:
+Common factories:
 
-- fixed pool for stable workloads
-- cached pool for bursty short tasks
-- scheduled pool for periodic jobs
+- `newFixedThreadPool(n)`: bounded concurrency
+- `newCachedThreadPool()`: grows as needed (risky under load spikes)
+- `newSingleThreadExecutor()`: ordered sequential work
+- `newScheduledThreadPool(n)`: delayed/periodic tasks
 
-## Runnable vs Callable
+For production, prefer an explicit `ThreadPoolExecutor` with clear queue and rejection policy.
 
-- `Runnable`: no result
-- `Callable<T>`: returns a result and can throw checked exceptions
+## Callable vs Runnable
+
+- `Runnable`: no return value
+- `Callable<T>`: returns a value and can throw checked exceptions
 
 ```java
-Callable<Integer> task = () -> 21 * 2;
-Future<Integer> future = pool.submit(task);
-Integer value = future.get();
+Callable<String> task = () -> loadReport(42);
+Future<String> future = pool.submit(task);
 ```
 
-## `Future` basics
+## Working with Future
 
-`Future` lets you:
+`Future` represents a result that may arrive later.
 
-- wait for completion (`get()`)
-- check status (`isDone()`)
-- cancel tasks (`cancel(true)`)
+Useful methods:
 
-Avoid blocking everywhere with `get()`; use timeouts when possible.
+- `get()`: block until done
+- `get(timeout, unit)`: fail fast on slow tasks
+- `isDone()`: non-blocking status check
+- `cancel(true)`: attempt interruption
 
-```java
-Integer value = future.get(1, TimeUnit.SECONDS);
-```
+Always prefer timeouts in request paths.
 
 ## Graceful shutdown
 
-Always close executors cleanly.
-
 ```java
 pool.shutdown();
-if (!pool.awaitTermination(5, TimeUnit.SECONDS)) {
+if (!pool.awaitTermination(30, TimeUnit.SECONDS)) {
     pool.shutdownNow();
 }
 ```
 
-This prevents resource leaks and hanging JVM shutdown.
+- `shutdown()`: stop accepting new tasks, finish queued ones
+- `shutdownNow()`: interrupt running tasks and discard queued work
+
+Hook shutdown into application lifecycle so pools do not leak threads.
+
+## Choosing pool size
+
+There is no universal formula, but start from workload type:
+
+- CPU-bound: near core count
+- I/O-bound: higher concurrency, carefully measured
+- mixed: separate pools by workload
+
+Tune with metrics (queue depth, latency, rejection rate), not guesses.
 
 ## Common mistakes
 
-- never shutting down the pool
-- using unbounded pools in production
-- blocking inside pool tasks for long I/O without sizing strategy
-- swallowing exceptions from futures
+- unbounded cached pools under traffic spikes
+- forgetting shutdown in long-running apps
+- calling `get()` without timeout
+- submitting blocking work to a tiny shared pool used by critical paths
 
-## Practical rule
+## Practice checklist
 
-Use `ExecutorService` as the default low-level concurrency tool when you need explicit thread-pool control.
+- submit a `Callable` and read the `Future` with timeout
+- shut down a pool with `awaitTermination`
+- compare fixed vs single-thread executor behavior
+- log queue size or active count while load testing
 
 ## Takeaway
 
-1. Prefer pools over ad-hoc threads
-2. Use `Callable/Future` for result-based tasks
-3. Apply timeouts on blocking waits
-4. Always implement graceful shutdown
+1. Prefer pools over manual thread creation
+2. Use `Callable`/`Future` when you need results
+3. Shut down executors cleanly
+4. Size and isolate pools based on measured workload
