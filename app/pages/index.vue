@@ -31,8 +31,8 @@ const featuredRoadmaps = computed(() => ([
     path: localePath('/postgresql'),
     title: 'PostgreSQL Roadmap',
     description: locale.value === 'fr'
-      ? 'Parcours progressif de PostgreSQL: modelisation, requetes, performance et operations en production.'
-      : 'Progressive PostgreSQL path covering modeling, querying, performance, and production operations.',
+      ? 'Parcours unique PostgreSQL: installation, SQL, index, transactions, sauvegardes et production.'
+      : 'One PostgreSQL path covering installation, SQL, indexes, transactions, backups, and production.',
     tags: ['roadmap', 'postgresql'],
     cover: '/banner-test.jpg'
   },
