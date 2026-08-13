@@ -1,288 +1,51 @@
 ---
 title: Project Setup
-description: Learn how to create a Spring Boot project with Spring Initializr, understand folder conventions, and set up Maven or Gradle cleanly.
+description: "Create a clean Spring Boot project with Initializr, standard folders, and a Maven or Gradle wrapper workflow."
 date: 2026-03-13
 tags: [spring-boot, setup, maven, gradle]
 draft: false
-readingTime: 12 min
+readingTime: 10 min
 ---
 
-## Why this topic matters
+## Where this lesson sits
 
-A lot of Spring Boot problems start before you even write business code.
+Lesson 1 explained what Boot is. This lesson is how you create a project you can share with a team: Initializr, folders, and a wrapper.
 
-If the project is created with unclear defaults, inconsistent folder structure, or a build setup the team does not really understand, development gets slower very quickly. Good setup is not glamorous, but it removes friction from everything that comes after.
+## What you will learn
 
-This step covers three things every beginner should understand early:
+- How to generate a project with Spring Initializr
+- Where production code, tests, and config live
+- Why Maven or Gradle wrappers beat a global CLI
 
-- how to create a project with Spring Initializr
-- how a standard Spring Boot folder structure is organized
-- how to choose and run Maven or Gradle correctly
+## Mental model
 
-## Start with Spring Initializr
+Initializr is not a toy. It emits the same conventions most Spring Boot codebases use: `src/main/java`, `src/main/resources`, `src/test/java`, a parent BOM or plugin, and `mvnw` / `gradlew`.
 
-The easiest and safest way to create a Spring Boot project is [Spring Initializr](https://start.spring.io/).
+Keep the main class in the root package (`com.briac.catalog`) and put feature packages under it. Component scanning starts there.
 
-It generates a project skeleton with the correct structure and build files for common Spring Boot applications.
+Pick **one** build tool and stay with it. Maven is usually simpler for a first API. Gradle is fine if the team already uses it. The wrapper pins the tool version so CI and laptops do not drift.
 
-### Typical fields you need to choose
+Do not dump every starter into the first generation. `Spring Web` is enough until a later lesson needs JPA, Security, or Actuator.
 
-When you create a new project, you usually decide:
+## Practical example
 
-- **Project**: Maven or Gradle
-- **Language**: Java
-- **Spring Boot version**: choose a stable version, not a milestone or snapshot unless you have a specific reason
-- **Group**: your organization or package root, for example `com.briac`
-- **Artifact**: your project technical name, for example `demo-api`
-- **Packaging**: usually `jar`
-- **Java**: align with the JDK version you actually use
-- **Dependencies**: start small, add only what you need
-
-### A simple example
+A typical first generation:
 
 - Project: Maven
-- Language: Java
-- Group: `com.briac`
-- Artifact: `demo-api`
-- Packaging: `jar`
-- Java: `21`
-- Dependencies: `Spring Web`
-
-That is enough to create a first API project without unnecessary complexity.
-
-## What Initializr gives you
-
-A generated Spring Boot project usually includes:
-
-- a main application class
-- a build file (`pom.xml` or `build.gradle(.kts)`)
-- a wrapper (`mvnw` or `gradlew`)
-- a default test class
-- a standard source directory structure
-
-That matters because you start from conventions used across most Spring Boot codebases.
-
-## Standard folder conventions
-
-A clean Spring Boot project usually looks like this:
+- Java: 21
+- Packaging: jar
+- Dependencies: Spring Web
 
 ```text
-demo-api
-├── src
-│   ├── main
-│   │   ├── java
-│   │   │   └── com
-│   │   │       └── briac
-│   │   │           └── demoapi
-│   │   │               └── DemoApiApplication.java
-│   │   └── resources
-│   │       ├── application.yml
-│   │       └── static
-│   └── test
-│       └── java
-│           └── com
-│               └── briac
-│                   └── demoapi
-│                       └── DemoApiApplicationTests.java
+catalog-api
+├── src/main/java/com/briac/catalog/CatalogApplication.java
+├── src/main/resources/application.yml
+├── src/test/java/com/briac/catalog/CatalogApplicationTests.java
 ├── pom.xml
 └── mvnw
 ```
 
-### What goes where
-
-- `src/main/java`: production code
-- `src/main/resources`: configuration, templates, static files, SQL scripts, etc.
-- `src/test/java`: automated tests
-- `application.yml`: application configuration
-
-This structure is simple, but it is important because many Spring conventions assume it.
-
-## Package naming matters
-
-Keep your main application class in a root package above the rest of the codebase.
-
-Example:
-
-```text
-com.briac.demoapi
-```
-
-Then place controllers, services, repositories, and configuration classes under it:
-
-```text
-com.briac.demoapi.web
-com.briac.demoapi.service
-com.briac.demoapi.repository
-com.briac.demoapi.config
-```
-
-This matters because component scanning starts from the package of the main application class.
-
-If your code lives outside that package tree, Spring may not detect your beans.
-
-## Maven or Gradle?
-
-Spring Boot officially recommends choosing a build system with proper dependency management, and in practice that means **Maven or Gradle**.
-
-Both are production-ready. The right question is not "which one is universally better?" The real question is "which one will your team understand and maintain consistently?"
-
-### Choose Maven if you want
-
-- a convention-first approach
-- a predictable project structure
-- XML configuration that stays explicit
-- easier onboarding for many Java teams
-
-### Choose Gradle if you want
-
-- a more programmable build
-- Kotlin DSL or Groovy DSL
-- more flexibility for advanced build logic
-- strong wrapper-based workflows
-
-If you are learning Spring Boot and do not have a team constraint yet, Maven is often the simpler first choice. If your team already uses Gradle, follow the team standard.
-
-## A minimal Maven setup
-
-Here is a typical Spring Boot Maven build file. The Boot version should match the one selected in Initializr:
-
-```xml
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-         https://maven.apache.org/xsd/maven-4.0.0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>your-selected-spring-boot-version</version>
-        <relativePath/>
-    </parent>
-
-    <groupId>com.briac</groupId>
-    <artifactId>demo-api</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>demo-api</name>
-
-    <properties>
-        <java.version>21</java.version>
-    </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
-</project>
-```
-
-### Why this works well
-
-- the Spring Boot parent manages many versions for you
-- starters reduce dependency boilerplate
-- the Maven plugin helps run and package the app
-- `mvnw` keeps the build entry point consistent across machines
-
-## A minimal Gradle Kotlin DSL setup
-
-Here is a typical Spring Boot `build.gradle.kts`. The plugin versions should match what Initializr generates for your selected Boot release:
-
-```kotlin
-plugins {
-    id("org.springframework.boot") version "your-selected-spring-boot-version"
-    id("io.spring.dependency-management") version "version-managed-by-initializr"
-    java
-}
-
-group = "com.briac"
-version = "0.0.1-SNAPSHOT"
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
-```
-
-### Why this works well
-
-- the Spring Boot plugin integrates the Boot build lifecycle
-- dependency management stays aligned with Spring Boot
-- the Java toolchain makes the JDK target explicit
-- the wrapper (`gradlew`) standardizes the Gradle version per project
-
-## Use the wrapper, not the global tool
-
-This is an important habit.
-
-### Maven
-
-Prefer:
-
-```bash
-./mvnw spring-boot:run
-./mvnw test
-./mvnw package
-```
-
-Instead of:
-
-```bash
-mvn spring-boot:run
-```
-
-### Gradle
-
-Prefer:
-
-```bash
-./gradlew bootRun
-./gradlew test
-./gradlew build
-```
-
-Instead of:
-
-```bash
-gradle bootRun
-```
-
-The wrapper ensures every developer and every CI environment uses the expected tool version.
-
-## First commands you should know
-
-### Maven
+Prefer the wrapper:
 
 ```bash
 ./mvnw spring-boot:run
@@ -290,82 +53,28 @@ The wrapper ensures every developer and every CI environment uses the expected t
 ./mvnw clean package
 ```
 
-### Gradle
+## Go further on the blog
 
-```bash
-./gradlew bootRun
-./gradlew test
-./gradlew clean build
-```
+Maven lifecycle details live in [Introduction to Maven in a Java Spring Boot project](/blog/introduction-to-maven-in-a-java-spring-boot-project). This lesson only covers the setup choices that unblock the rest of the path.
 
-These commands are enough to cover the basic local workflow:
+## Common mistakes
 
-- run the app
-- run tests
-- build a packaged artifact
+- Generating the project with Security, JPA, Mail, and Actuator "just in case"
+- Running a global `mvn` while CI uses a different wrapper version
+- Placing application classes above the main-class package
 
-## Common beginner mistakes
+## Next lesson
 
-### Adding too many dependencies at project creation time
+Next: [Dependency Injection and Beans](/spring-boot/dependency-injection-and-beans).
 
-Start with only what you need. For example, `Spring Web` is enough for a first REST API.
-
-### Mixing JDK versions
-
-Do not develop with one Java version and expect another one in CI or production without verifying compatibility.
-
-### Ignoring the wrapper
-
-If one developer uses a different Maven or Gradle version than the rest of the team, build behavior may drift.
-
-### Placing code in the wrong package
-
-If your main application class is in `com.briac.demoapi`, keep your application code under that same package root.
-
-## Practical recommendation
-
-For a first serious Spring Boot project:
-
-1. generate the project with Spring Initializr
-2. choose `jar` packaging
-3. choose Java 21 if your environment supports it
-4. start with `Spring Web`
-5. use the wrapper from day one
-6. add dependencies only when a real need appears
-
-This gives you a clean base and keeps the project understandable.
-
-## Recommended official resources
+## Official docs
 
 - [Spring Initializr](https://start.spring.io/)
-- [Spring Boot Build Systems](https://docs.spring.io/spring-boot/reference/using/build-systems.html)
-- [Spring Boot Getting Started Guide](https://spring.io/guides/gs/spring-boot)
-- [Maven in 5 Minutes](https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html)
-- [Maven Users Centre](https://maven.apache.org/users/)
-- [Gradle Installation](https://docs.gradle.org/current/userguide/installation.html)
-- [Gradle Wrapper Basics](https://docs.gradle.org/userguide/gradle_wrapper_basics.html)
-
-## Sources
-
-This article is based on official documentation:
-
-- Spring Boot build systems reference: [docs.spring.io/spring-boot/reference/using/build-systems.html](https://docs.spring.io/spring-boot/reference/using/build-systems.html)
-- Spring Boot getting started guide: [spring.io/guides/gs/spring-boot](https://spring.io/guides/gs/spring-boot)
-- Spring Initializr: [start.spring.io](https://start.spring.io/)
-- Maven getting started guide: [maven.apache.org/guides/getting-started/maven-in-five-minutes.html](https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html)
-- Maven users centre: [maven.apache.org/users](https://maven.apache.org/users/)
-- Gradle installation guide: [docs.gradle.org/current/userguide/installation.html](https://docs.gradle.org/current/userguide/installation.html)
-- Gradle wrapper basics: [docs.gradle.org/userguide/gradle_wrapper_basics.html](https://docs.gradle.org/userguide/gradle_wrapper_basics.html)
+- [Spring Boot build systems](https://docs.spring.io/spring-boot/reference/using/build-systems.html)
+- [Gradle Wrapper basics](https://docs.gradle.org/userguide/gradle_wrapper_basics.html)
 
 ## Takeaway
 
-Project setup is not just an administrative step.
-
-It defines:
-
-- how the application is built
-- how other developers run it
-- how dependencies are managed
-- how easy the project will be to maintain later
-
-If you start with a clean structure, a clear build tool, and a disciplined wrapper workflow, the rest of your Spring Boot roadmap becomes much easier.
+- Initializr plus a wrapper is the team-safe starting point
+- Folder and package conventions are part of how Boot finds your code
+- Add dependencies when a later lesson needs them, not on day one

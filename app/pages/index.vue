@@ -22,8 +22,8 @@ const featuredRoadmaps = computed(() => ([
     path: localePath('/spring-boot'),
     title: 'Spring Boot Roadmap',
     description: locale.value === 'fr'
-      ? 'Parcours complet de Spring Boot: architecture API, securite, tests et production.'
-      : 'Complete Spring Boot learning path covering API architecture, security, testing, and production.',
+      ? 'Parcours Spring Boot en 21 leçons, de l’API REST à la sécurité, aux tests et à la production.'
+      : 'A 21-lesson Spring Boot path from REST APIs to security, testing, and production.',
     tags: ['roadmap', 'spring-boot'],
     cover: '/banner-test.jpg'
   },

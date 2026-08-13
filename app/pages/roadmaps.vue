@@ -20,7 +20,7 @@ const roadmaps: RoadmapItem[] = [
   {
     path: '/spring-boot',
     title: 'Spring Boot Roadmap',
-    description: 'A complete path from Spring Boot fundamentals to secure, testable, production-grade APIs.',
+    description: 'A 21-lesson path from Spring Boot fundamentals to secure, testable, production-grade APIs.',
     tags: ['roadmap', 'spring-boot', 'backend'],
     cover: '/banner-test.jpg'
   },

@@ -1,114 +1,116 @@
 <script setup lang="ts">
 import { useI18n, useLocalePath } from '#i18n'
-
-interface SpringBootRoadmapPost {
-  path: string
-  title: string
-  description: string
-  date: string
-  tags?: string[]
-  draft?: boolean
-  readingTime?: string
-  body?: {
-    toc?: {
-      links?: Array<{
-        id: string
-        text: string
-      }>
-    }
-  }
-}
+import type { SpringBootRoadmapPost } from '../../composables/useSpringBootRoadmaps'
+import { getSpringBootRoadmapStepBySlug, normalizeSpringBootRoadmapPath } from '../../data/spring-boot-roadmap'
 
 const route = useRoute()
 const localePath = useLocalePath()
 const { locale } = useI18n()
+const config = useRuntimeConfig()
 
 const slug = computed(() => route.params.slug as string[])
-const path = computed(() => `/spring-boot/${slug.value.join('/')}`)
-const legacyEnPath = computed(() => `/roadmaps/spring-boot/${slug.value.join('/')}`)
-const legacyFrPath = computed(() => `/roadmaps-fr/spring-boot/${slug.value.join('/')}`)
+const currentSlug = computed(() => slug.value.join('/'))
 
-const queryCollectionLoose = queryCollection as unknown as (collection: string) => {
-  path: (value: string) => { first: () => Promise<SpringBootRoadmapPost | null> }
-  where: (field: string, operator: '=', value: boolean) => { all: () => Promise<SpringBootRoadmapPost[]> }
-}
+const loadedPost = await useSpringBootRoadmapPost(slug.value)
 
-let post: SpringBootRoadmapPost | null = null
-
-if (locale.value === 'fr') {
-  post = await queryCollectionLoose('roadmapsFr').path(path.value).first()
-  if (!post) {
-    post = await queryCollectionLoose('roadmapsFr').path(legacyFrPath.value).first()
-  }
-}
-
-if (!post) {
-  post = await queryCollection('roadmaps').path(path.value).first() as SpringBootRoadmapPost | null
-  if (!post) {
-    post = await queryCollection('roadmaps').path(legacyEnPath.value).first() as SpringBootRoadmapPost | null
-  }
-}
-
-if (!post) {
+if (!loadedPost) {
   throw createError({ statusCode: 404, statusMessage: 'Spring Boot roadmap article not found' })
 }
 
-const normalizeSpringBootPath = (value: string) => {
-  if (value.startsWith('/spring-boot/')) {
-    return value
-  }
-  if (value.startsWith('/roadmaps/spring-boot/')) {
-    return value.replace('/roadmaps/spring-boot/', '/spring-boot/')
-  }
-  if (value.startsWith('/roadmaps-fr/spring-boot/')) {
-    return value.replace('/roadmaps-fr/spring-boot/', '/spring-boot/')
-  }
-  return value
-}
-
-const rawPosts = locale.value === 'fr'
-  ? await queryCollectionLoose('roadmapsFr').where('draft', '=', false).all()
-  : await queryCollection('roadmaps').where('draft', '=', false).all() as SpringBootRoadmapPost[]
-
-const springBootPosts = rawPosts
-  .filter((item) =>
-    item.path.startsWith('/spring-boot/') ||
-    item.path.startsWith('/roadmaps/spring-boot/') ||
-    item.path.startsWith('/roadmaps-fr/spring-boot/')
-  )
-  .map((item) => ({ ...item, path: normalizeSpringBootPath(item.path) }))
-  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-
-const currentIndex = computed(() => springBootPosts.findIndex((item) => item.path === normalizeSpringBootPath(post.path)))
-const prevPost = computed(() => (currentIndex.value < springBootPosts.length - 1 ? springBootPosts[currentIndex.value + 1] : null))
-const nextPost = computed(() => (currentIndex.value > 0 ? springBootPosts[currentIndex.value - 1] : null))
+const post: SpringBootRoadmapPost = loadedPost
+const allPosts = await useSpringBootRoadmaps()
+const currentIndex = computed(() => allPosts.findIndex((item: SpringBootRoadmapPost) => item.path === normalizeSpringBootRoadmapPath(post.path)))
+const prevPost = computed(() => (currentIndex.value > 0 ? allPosts[currentIndex.value - 1] : null))
+const nextPost = computed(() => (currentIndex.value < allPosts.length - 1 ? allPosts[currentIndex.value + 1] : null))
 const visibleTags = computed(() => (post.tags || []).slice(0, 4))
+const currentStep = computed(() => getSpringBootRoadmapStepBySlug(currentSlug.value))
 
-const ui = computed(() => locale.value === 'fr'
-  ? {
-      back: 'Retour à la roadmap Spring Boot',
-      previous: 'Précédent',
-      next: 'Suivant',
-      toc: 'Table des matières',
-      noHeadings: 'Aucun titre dans cet article.',
-      navAria: 'Navigation des articles de roadmap Spring Boot'
-    }
-  : {
-      back: 'Back to Spring Boot Roadmap',
-      previous: 'Previous',
-      next: 'Next',
-      toc: 'Table of contents',
-      noHeadings: 'No headings in this post.',
-      navAria: 'Spring Boot roadmap article navigation'
-    }
+const ui = computed(() =>
+  locale.value === 'fr'
+    ? {
+        back: 'Retour à la roadmap Spring Boot',
+        previous: 'Leçon précédente',
+        next: 'Leçon suivante',
+        toc: 'Table des matières',
+        noHeadings: 'Aucun titre dans cet article.',
+        navAria: 'Navigation des leçons Spring Boot',
+        stepLabel: currentStep.value ? `Leçon ${currentStep.value.id} sur 21` : 'Leçon Spring Boot'
+      }
+    : {
+        back: 'Back to Spring Boot Roadmap',
+        previous: 'Previous lesson',
+        next: 'Next lesson',
+        toc: 'Table of contents',
+        noHeadings: 'No headings in this post.',
+        navAria: 'Spring Boot lesson navigation',
+        stepLabel: currentStep.value ? `Lesson ${currentStep.value.id} of 21` : 'Spring Boot lesson'
+      }
+)
+
+const pageUrl = computed(() =>
+  locale.value === 'fr'
+    ? `${config.public.siteUrl}/fr/spring-boot/${currentSlug.value}`
+    : `${config.public.siteUrl}/spring-boot/${currentSlug.value}`
 )
 
 useSeoMeta({
   title: post.title,
   description: post.description,
   ogTitle: `${post.title} | Briac`,
-  ogDescription: post.description
+  ogDescription: post.description,
+  ogUrl: pageUrl.value,
+  ogType: 'article'
 })
+
+useHead(() => ({
+  script: [
+    {
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'LearningResource',
+        name: post.title,
+        description: post.description,
+        url: pageUrl.value,
+        inLanguage: locale.value === 'fr' ? 'fr-FR' : 'en-US',
+        learningResourceType: 'Lesson',
+        isPartOf: {
+          '@type': 'Course',
+          name: locale.value === 'fr' ? 'Roadmap Spring Boot' : 'Spring Boot Roadmap',
+          url: locale.value === 'fr' ? `${config.public.siteUrl}/fr/spring-boot` : `${config.public.siteUrl}/spring-boot`
+        },
+        position: currentStep.value?.id
+      })
+    },
+    {
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: locale.value === 'fr' ? 'Roadmaps' : 'Roadmaps',
+            item: `${config.public.siteUrl}${localePath('/roadmaps')}`
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: locale.value === 'fr' ? 'Roadmap Spring Boot' : 'Spring Boot Roadmap',
+            item: `${config.public.siteUrl}${localePath('/spring-boot')}`
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: post.title,
+            item: pageUrl.value
+          }
+        ]
+      })
+    }
+  ]
+}))
 </script>
 
 <template>
@@ -121,6 +123,7 @@ useSeoMeta({
           <span>←</span>
           <span>{{ ui.back }}</span>
         </NuxtLink>
+        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">{{ ui.stepLabel }}</p>
         <h1 class="text-3xl font-bold leading-tight sm:text-4xl">{{ post.title }}</h1>
         <p class="text-zinc-300">{{ post.description }}</p>
         <div class="flex flex-wrap gap-2">
