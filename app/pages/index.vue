@@ -40,8 +40,8 @@ const featuredRoadmaps = computed(() => ([
     path: localePath('/vue-js'),
     title: 'Vue.js Roadmap',
     description: locale.value === 'fr'
-      ? 'Parcours Vue.js progressif: reactivite, composants, routing, state management et frontend de production.'
-      : 'Progressive Vue.js path covering reactivity, components, routing, state management, and production frontend architecture.',
+      ? 'Parcours Vue 3 en 18 étapes : Composition API, composants, Vue Router, Pinia, tests et déploiement SPA.'
+      : '18-step Vue 3 path: Composition API, components, Vue Router, Pinia, testing, and SPA deployment.',
     tags: ['roadmap', 'vue'],
     cover: '/banner-test.jpg'
   },
