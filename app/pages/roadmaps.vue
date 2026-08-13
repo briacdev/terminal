@@ -27,7 +27,7 @@ const roadmaps: RoadmapItem[] = [
   {
     path: '/postgresql',
     title: 'PostgreSQL Roadmap',
-    description: 'A progressive path from SQL basics to PostgreSQL performance, reliability, and production operations.',
+    description: 'A single bilingual path from installation and SQL to indexes, transactions, backups, and production operations.',
     tags: ['roadmap', 'postgresql', 'data'],
     cover: '/banner-test.jpg'
   },
