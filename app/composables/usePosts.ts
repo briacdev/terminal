@@ -59,7 +59,7 @@ export const usePosts = async (localeCode = 'en') => {
   const rawPosts = await queryCollection('posts')
     .where('draft', '=', false)
     .order('date', 'DESC')
-    .all() as RawBlogPost[]
+    .all() as unknown as RawBlogPost[]
 
   if (localeCode !== 'fr') {
     return rawPosts
