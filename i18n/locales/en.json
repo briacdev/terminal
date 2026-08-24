@@ -51,6 +51,13 @@
     "visiblePlural": "{count} articles visible",
     "empty": "No matching articles found."
   },
+  "blogDetail": {
+    "toc": "Table of contents",
+    "noHeadings": "No headings in this post.",
+    "previous": "Previous",
+    "next": "Next",
+    "navigationAria": "Article navigation"
+  },
   "projects": {
     "seo": {
       "title": "Projects",

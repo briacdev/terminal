@@ -5,8 +5,8 @@ const route = useRoute()
 const initialSearch = typeof route.query.search === 'string' ? route.query.search : ''
 const search = ref(initialSearch)
 const activeTag = ref<string | null>(null)
-const posts = await usePosts()
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const posts = await usePosts(locale.value)
 
 const allTags = computed(() => {
   return Array.from(new Set(posts.flatMap((post) => post.tags))).sort((a, b) => a.localeCompare(b))

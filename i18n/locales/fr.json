@@ -51,6 +51,13 @@
     "visiblePlural": "{count} articles visibles",
     "empty": "Aucun article ne correspond à cette recherche."
   },
+  "blogDetail": {
+    "toc": "Table des matières",
+    "noHeadings": "Aucun titre dans cet article.",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "navigationAria": "Navigation des articles"
+  },
   "projects": {
     "seo": {
       "title": "Projets",

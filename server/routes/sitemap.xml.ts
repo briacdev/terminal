@@ -10,8 +10,13 @@ export default defineEventHandler(async (event) => {
 
   const projects = await queryCollection(event, 'projects').all()
 
-  const staticUrls = ['/', '/blog', '/projects', '/about']
-  const contentUrls = [...posts.map((post) => post.path), ...projects.map((project) => project.path)]
+  const staticUrls = ['/', '/blog', '/projects', '/about', '/fr', '/fr/blog', '/fr/projects', '/fr/about']
+  const contentUrls = [
+    ...posts.map((post) => post.path),
+    ...posts.map((post) => `/fr${post.path}`),
+    ...projects.map((project) => project.path),
+    ...projects.map((project) => `/fr${project.path}`)
+  ]
   const urls = [...staticUrls, ...contentUrls]
 
   const entries = urls
