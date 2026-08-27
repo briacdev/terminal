@@ -25,6 +25,26 @@ export default defineContentConfig({
       })
     }),
 
+    postsFr: defineCollection({
+      type: 'page',
+      source: 'blog-fr/**/*.md',
+      schema: z.object({
+        title: z.string(),
+        description: z.string(),
+        date: z.union([z.string(), z.date()]).transform((value) => {
+          if (typeof value === 'string') {
+            return value
+          }
+          return value.toISOString().slice(0, 10)
+        }),
+        tags: z.array(z.string()).default([]),
+        draft: z.boolean().default(false),
+        cover: z.string().optional(),
+        coverAlt: z.string().optional(),
+        readingTime: z.string().optional()
+      })
+    }),
+
     roadmaps: defineCollection({
       type: 'page',
       source: 'roadmaps/**/*.md',

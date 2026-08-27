@@ -9,7 +9,7 @@ const props = defineProps<{
 
 const { locale } = useI18n()
 const localePath = useLocalePath()
-const posts = await usePosts()
+const posts = await usePosts(locale.value)
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
