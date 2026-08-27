@@ -520,6 +520,14 @@ button:hover,
   margin-bottom: 1rem;
 }
 
+.blog-prose img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 1.5rem 0;
+  border: 1px solid #4b4b4b;
+}
+
 .blog-prose ul,
 .blog-prose ol {
   margin-top: 1rem;

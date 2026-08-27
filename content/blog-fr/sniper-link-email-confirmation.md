@@ -5,6 +5,8 @@ date: 2026-08-24
 tags: [onboarding, email, growth, ux, frontend]
 draft: false
 readingTime: 8 min
+cover: /blog-media/sniper-link-email-confirmation/flow-before-after-fr.webp
+coverAlt: "Deux parcours d'inscription : un écran générique « vérifiez votre boîte » versus un Sniper Link qui ouvre une recherche Gmail filtrée."
 ---
 
 Une inscription n'est pas terminée quand le formulaire est envoyé. Elle est terminée quand la personne confirme son email.
@@ -26,6 +28,8 @@ Un Sniper Link est un bouton sur la page « confirmez votre email ». Il ne poin
 La personne doit toujours cliquer sur Confirmer dans l'email. Vous ne contournez pas la vérification. Vous enlevez le vide entre « je me suis inscrit » et « j'ai trouvé le message ».
 
 Ce vide coûte cher. On part parce que la boîte est bruyante, parce que le mail est en spam, ou parce que trois sessions Gmail sont ouvertes et que la mauvaise s'affiche. Un bon Sniper Link traite ces trois cas.
+
+![Deux parcours d'inscription : un écran générique « vérifiez votre boîte » versus un Sniper Link qui ouvre une recherche Gmail filtrée.](/blog-media/sniper-link-email-confirmation/flow-before-after-fr.webp){width="1600" height="900"}
 
 ## Pourquoi « vérifiez votre boîte mail » ne suffit pas
 
@@ -67,6 +71,8 @@ Chaque morceau a un rôle :
 Utilisez le domaine d'envoi réel, pas une adresse personnelle, si plusieurs expéditeurs existent (`noreply@`, `hello@`, `support@`). La forme `@votredomaine.com` les couvre tous.
 
 Si vous envoyez depuis Google Workspace sur un domaine custom, la même URL Gmail fonctionne. Le fournisseur est Gmail. L'adresse utilisateur est `prenom@entreprise.com`.
+
+![Anatomie d'une URL Sniper Link Gmail : webmail, compte, recherche, expéditeur, spam et fenêtre de temps.](/blog-media/sniper-link-email-confirmation/gmail-url-anatomy-fr.webp){width="1600" height="900"}
 
 ## URLs pour les autres fournisseurs
 
@@ -195,6 +201,8 @@ Remplacez la phrase passive par un bouton qui nomme le fournisseur.
 Mieux : « Nous avons envoyé une confirmation à `jane.doe@gmail.com`. Ouvrez Gmail pour confirmer. »
 
 Gardez un second chemin : renvoyer l'email, changer l'adresse, et une note courte sur le spam. Le Sniper Link est le CTA principal, pas le seul.
+
+![Écran après inscription avec un bouton Ouvrir Gmail, à côté d'une recherche Gmail filtrée qui n'affiche que l'email de confirmation.](/blog-media/sniper-link-email-confirmation/confirmation-cta-fr.webp){width="1600" height="900"}
 
 Exemple Vue 3 :
 

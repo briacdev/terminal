@@ -7,6 +7,9 @@ date: 2026-08-24
 tags: [onboarding, email, growth, ux, frontend]
 draft: false
 readingTime: 8 min
+cover: /blog-media/sniper-link-email-confirmation/flow-before-after-en.webp
+coverAlt: "Two onboarding paths: a generic check-your-inbox screen versus a Sniper Link that opens a filtered Gmail search."
+coverAltFr: "Deux parcours d'inscription : un écran générique « vérifiez votre boîte » versus un Sniper Link qui ouvre une recherche Gmail filtrée."
 ---
 
 A signup is not finished when the form is submitted. It is finished when the user confirms their email.
@@ -28,6 +31,8 @@ A Sniper Link is a button on the "verify your email" page. It does not point to 
 The user still has to click Confirm in the email. You are not skipping verification. You are removing the empty space between "I signed up" and "I found the message."
 
 That gap is expensive. People bounce because the mailbox is noisy, the email landed in spam, or they had three Gmail sessions open and opened the wrong one. A good Sniper Link attacks those three problems at once.
+
+![Two onboarding paths: a generic check-your-inbox screen versus a Sniper Link that opens a filtered Gmail search.](/blog-media/sniper-link-email-confirmation/flow-before-after-en.webp){width="1600" height="900"}
 
 ## Why "check your inbox" fails
 
@@ -69,6 +74,8 @@ Each piece has a job:
 Use your real sending domain, not a personal mailbox, if several addresses can send (`noreply@`, `hello@`, `support@`). The `@yourdomain.com` form matches all of them.
 
 If you send from Google Workspace on a custom domain, the same Gmail URL still works. The provider is Gmail. The user's address is `name@company.com`.
+
+![Annotated Gmail Sniper Link URL with webmail, account, search, sender, spam, and time fragments.](/blog-media/sniper-link-email-confirmation/gmail-url-anatomy-en.webp){width="1600" height="900"}
 
 ## URLs for other providers
 
@@ -197,6 +204,8 @@ Bad: "We sent you an email. Check your inbox."
 Better: "We sent a confirmation to `jane.doe@gmail.com`. Open Gmail to confirm."
 
 Keep a second path: resend the email, change the address, and a short note about spam. The Sniper Link is the primary CTA, not the only one.
+
+![Post-signup screen with an Open Gmail button next to a filtered Gmail search showing only the confirmation email.](/blog-media/sniper-link-email-confirmation/confirmation-cta-en.webp){width="1600" height="900"}
 
 A Vue 3 example:
 
