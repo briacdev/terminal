@@ -5,8 +5,8 @@ date: 2026-08-24
 tags: [onboarding, email, growth, ux, frontend]
 draft: false
 readingTime: 8 min
-cover: /blog-media/sniper-link-email-confirmation/flow-before-after-fr.webp
-coverAlt: "Deux parcours d'inscription : un écran générique « vérifiez votre boîte » versus un Sniper Link qui ouvre une recherche Gmail filtrée."
+cover: /blog-media/sniper-link-email-confirmation/cover-fr.webp
+coverAlt: "Parcours Sniper Link en quatre étapes : inscription, Ouvrir Gmail, recherche filtrée, confirmation."
 ---
 
 Une inscription n'est pas terminée quand le formulaire est envoyé. Elle est terminée quand la personne confirme son email.

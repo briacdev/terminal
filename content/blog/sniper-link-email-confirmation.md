@@ -7,9 +7,9 @@ date: 2026-08-24
 tags: [onboarding, email, growth, ux, frontend]
 draft: false
 readingTime: 8 min
-cover: /blog-media/sniper-link-email-confirmation/flow-before-after-en.webp
-coverAlt: "Two onboarding paths: a generic check-your-inbox screen versus a Sniper Link that opens a filtered Gmail search."
-coverAltFr: "Deux parcours d'inscription : un écran générique « vérifiez votre boîte » versus un Sniper Link qui ouvre une recherche Gmail filtrée."
+cover: /blog-media/sniper-link-email-confirmation/cover-en.webp
+coverAlt: "Four-step Sniper Link path: sign up, Open Gmail, filtered search, then confirm."
+coverAltFr: "Parcours Sniper Link en quatre étapes : inscription, Ouvrir Gmail, recherche filtrée, confirmation."
 ---
 
 A signup is not finished when the form is submitted. It is finished when the user confirms their email.
